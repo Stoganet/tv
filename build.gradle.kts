@@ -1,5 +1,19 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.openapi.generator) apply false
+    alias(libs.plugins.protobuf) apply false
+    alias(libs.plugins.detekt)
+}
+
+detekt {
+    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+    buildUponDefaultConfig = true
+    allRules = false
+    source.setFrom(files("app/src/main/kotlin", "app/src/test/kotlin", "app/src/main/java", "app/src/test/java"))
+}
+
+dependencies {
+    detektPlugins(libs.detekt.ktlint.wrapper)
 }
