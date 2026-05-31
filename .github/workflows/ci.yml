@@ -31,7 +31,7 @@ jobs:
         run: ./gradlew detekt
 
   build:
-    name: build
+    name: build+test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
