@@ -22,8 +22,7 @@ object HttpClients {
         encodeDefaults = true
     }
 
-    fun authedOkHttp(authInterceptor: Interceptor): OkHttpClient =
-        baseBuilder().addInterceptor(authInterceptor).build()
+    fun authedOkHttp(authInterceptor: Interceptor): OkHttpClient = baseBuilder().addInterceptor(authInterceptor).build()
 
     fun rawOkHttp(): OkHttpClient = baseBuilder().build()
 

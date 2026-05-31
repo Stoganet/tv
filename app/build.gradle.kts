@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.openapi.generator)
+    alias(libs.plugins.protobuf)
 }
 
 android {
@@ -96,6 +97,19 @@ tasks.named("preBuild") {
     dependsOn("openApiGenerate")
 }
 
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${libs.versions.protobuf.asProvider().get()}"
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                create("java") { option("lite") }
+            }
+        }
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime)
@@ -123,6 +137,7 @@ dependencies {
     implementation(libs.coil.network.okhttp)
 
     implementation(libs.datastore)
+    implementation(libs.protobuf.javalite)
     implementation(libs.tink.android)
 
     implementation(libs.timber)

@@ -58,7 +58,6 @@ coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp"
 
 datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
 protobuf-javalite = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "protobuf" }
-protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version.ref = "protobuf" }
 tink-android = { group = "com.google.crypto.tink", name = "tink-android", version.ref = "tink" }
 
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
