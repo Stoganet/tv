@@ -1,0 +1,32 @@
+# Build outputs
+build/
+captures/
+.cxx/
+.externalNativeBuild/
+*.apk
+*.aab
+
+# Gradle
+.gradle/
+
+# IntelliJ / Android Studio
+*.iml
+.idea/
+
+# Per-developer local config
+local.properties
+
+# Signing material
+*.jks
+*.keystore
+keystore.properties
+
+# Generated code
+app/build/generated/openapi/
+
+# Working documents (specs, plans)
+docs/superpowers/
+
+# OS
+.DS_Store
+Thumbs.db
