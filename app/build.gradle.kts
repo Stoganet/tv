@@ -89,7 +89,14 @@ tasks.named("openApiGenerate") {
     val outDirProvider = openApiOutDir
     doLast {
         val out = outDirProvider.get().asFile
-        unusedSupportingFiles.forEach { File(out, it).deleteRecursively() }
+        unusedSupportingFiles.forEach { rel ->
+            val target = File(out, rel)
+            if (target.exists()) {
+                target.deleteRecursively()
+            } else {
+                logger.warn("openApiGenerate cleanup: expected path not found (generator output may have changed): $target")
+            }
+        }
     }
 }
 

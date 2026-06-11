@@ -24,7 +24,7 @@ object HttpClients {
 
     fun authedOkHttp(authInterceptor: Interceptor): OkHttpClient = baseBuilder().addInterceptor(authInterceptor).build()
 
-    fun rawOkHttp(): OkHttpClient = baseBuilder().build()
+    val rawOkHttp: OkHttpClient by lazy { baseBuilder().build() }
 
     fun retrofit(client: OkHttpClient): Retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
