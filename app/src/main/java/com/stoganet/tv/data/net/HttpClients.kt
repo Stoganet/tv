@@ -3,6 +3,7 @@ package com.stoganet.tv.data.net
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.stoganet.tv.BuildConfig
 import kotlinx.serialization.json.Json
+import okhttp3.Authenticator
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -22,7 +23,8 @@ object HttpClients {
         encodeDefaults = true
     }
 
-    fun authedOkHttp(authInterceptor: Interceptor): OkHttpClient = baseBuilder().addInterceptor(authInterceptor).build()
+    fun authedOkHttp(interceptor: Interceptor, authenticator: Authenticator): OkHttpClient =
+        baseBuilder().addInterceptor(interceptor).authenticator(authenticator).build()
 
     val rawOkHttp: OkHttpClient by lazy { baseBuilder().build() }
 
