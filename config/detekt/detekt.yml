@@ -25,7 +25,7 @@ style:
     ignoreRanges: true
     ignoreAnnotation: true
   MaxLineLength:
-    maxLineLength: 140
+    maxLineLength: 120
   ReturnCount:
     max: 4
   WildcardImport:
@@ -34,10 +34,13 @@ style:
       - 'androidx.compose.material3.*'
       - 'androidx.compose.runtime.*'
       - 'androidx.compose.ui.*'
+  ExpressionBodySyntax:
+    active: true
+    includeLineWrapping: true
 
 ktlint:
   active: true
   android: true
   autoCorrect: true
   MaximumLineLength:
-    maxLineLength: 140
+    maxLineLength: 120
