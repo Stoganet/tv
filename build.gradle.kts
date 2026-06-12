@@ -14,6 +14,10 @@ detekt {
     source.setFrom(files("app/src/main/kotlin", "app/src/test/kotlin", "app/src/main/java", "app/src/test/java"))
 }
 
+tasks.named("detekt") {
+    dependsOn(":app:openApiGenerate", ":app:generateDebugProto")
+}
+
 dependencies {
     detektPlugins(libs.detekt.ktlint.wrapper)
 }
