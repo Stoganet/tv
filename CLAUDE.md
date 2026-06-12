@@ -21,9 +21,19 @@ These cross-file constraints matter when editing — violating any is a 🔴 Imp
 - **All token access goes through `TokenStore`** (Proto DataStore + Tink). No raw
   `SharedPreferences`, no direct file I/O, no globals.
 - **`UiState` is immutable** and updated only via `_state.update { it.copy(...) }`.
+- **`UiState` data classes are annotated `@Immutable`** — tells the Compose compiler the type is
+  stable, enables recomposition skipping.
 - **Collections inside `UiState` are `ImmutableList` / `ImmutableMap`** from
   `kotlinx.collections.immutable`.
 - **`ViewModel → Repository → generated ApiClient`** layering is one-way.
+- **Composables never receive a `ViewModel` as a parameter.** The NavHost `composable {}` block
+  owns ViewModel creation and state collection; it passes `state: UiState` and
+  `onIntent: (Intent) -> Unit` to the screen composable. This keeps screens pure, previewable,
+  and testable without Android framework dependencies.
+- **Every screen composable has `@Preview` functions** for each meaningful UI state.
+- **All interactive TV elements have an explicit `contentDescription`** via
+  `Modifier.semantics { contentDescription = "..." }`. On TV, TalkBack reads `contentDescription`
+  from the focusable element — child `Text` implicit labels are unreliable on D-pad focus.
 - **Strings live in `res/values/strings.xml`.** No hardcoded user-visible English in Compose code.
 - **No telemetry / crash reporting / analytics.**
 - **CI actions are SHA-pinned**, never tag-pinned.
