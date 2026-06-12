@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.openapi.generator)
+    alias(libs.plugins.protobuf)
 }
 
 android {
@@ -55,6 +57,66 @@ kotlin {
     jvmToolchain(25)
 }
 
+openApiGenerate {
+    generatorName.set("kotlin")
+    library.set("jvm-retrofit2")
+    inputSpec.set("${rootDir}/openapi/openapi.yaml")
+    outputDir.set(layout.buildDirectory.dir("generated/openapi").get().asFile.absolutePath)
+    apiPackage.set("com.stoganet.tv.api")
+    modelPackage.set("com.stoganet.tv.api.model")
+    packageName.set("com.stoganet.tv.api")
+    configOptions.set(
+        mapOf(
+            "useCoroutines" to "true",
+            "serializationLibrary" to "kotlinx_serialization",
+            "enumPropertyNaming" to "UPPERCASE",
+            "omitGradleWrapper" to "true",
+        ),
+    )
+}
+
+android.sourceSets["main"].kotlin.srcDirs(
+    "${layout.buildDirectory.get().asFile}/generated/openapi/src/main/kotlin",
+)
+
+val openApiOutDir = layout.buildDirectory.dir("generated/openapi")
+
+tasks.named("openApiGenerate") {
+    val unusedSupportingFiles = listOf(
+        "src/main/kotlin/com/stoganet/tv/api/infrastructure/ApiClient.kt",
+        "src/main/kotlin/com/stoganet/tv/api/auth",
+    )
+    val outDirProvider = openApiOutDir
+    doLast {
+        val out = outDirProvider.get().asFile
+        unusedSupportingFiles.forEach { rel ->
+            val target = File(out, rel)
+            if (target.exists()) {
+                target.deleteRecursively()
+            } else {
+                logger.warn("openApiGenerate cleanup: expected path not found (generator output may have changed): $target")
+            }
+        }
+    }
+}
+
+tasks.named("preBuild") {
+    dependsOn("openApiGenerate")
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${libs.versions.protobuf.asProvider().get()}"
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                create("java") { option("lite") }
+            }
+        }
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime)
@@ -82,6 +144,7 @@ dependencies {
     implementation(libs.coil.network.okhttp)
 
     implementation(libs.datastore)
+    implementation(libs.protobuf.javalite)
     implementation(libs.tink.android)
 
     implementation(libs.timber)
