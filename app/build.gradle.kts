@@ -45,7 +45,10 @@ android {
     }
 
     testOptions {
-        unitTests.all { it.useJUnitPlatform() }
+        unitTests.all {
+            it.useJUnitPlatform()
+            it.jvmArgs("-Xmx1g")
+        }
     }
 
     packaging {
@@ -75,6 +78,10 @@ openApiGenerate {
     )
 }
 
+android.sourceSets["main"].java.srcDirs(
+    "${layout.buildDirectory.get().asFile}/generated/java/generateDebugProto/java",
+)
+
 android.sourceSets["main"].kotlin.srcDirs(
     "${layout.buildDirectory.get().asFile}/generated/openapi/src/main/kotlin",
 )
@@ -101,7 +108,17 @@ tasks.named("openApiGenerate") {
 }
 
 tasks.named("preBuild") {
-    dependsOn("openApiGenerate")
+    dependsOn("openApiGenerate", "generateDebugProto")
+}
+
+tasks.register("generateSources") {
+    dependsOn("openApiGenerate", "generateDebugProto")
+    group = "build setup"
+    description = "Regenerate all generated sources after clean"
+}
+
+tasks.matching { it.name.startsWith("detekt") }.configureEach {
+    dependsOn("openApiGenerate", "generateDebugProto")
 }
 
 protobuf {
@@ -121,6 +138,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.navigation.compose)
@@ -128,6 +146,7 @@ dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
+    implementation(libs.compose.material3)
     implementation(libs.compose.foundation)
     implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)
@@ -151,9 +170,11 @@ dependencies {
 
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.turbine)
     testImplementation(libs.coroutines.test)
     testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.mockk)
 
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.compose.ui.test.junit4)
