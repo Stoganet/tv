@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.IOException
 import kotlin.time.Duration.Companion.milliseconds
 
 class QuickConnectViewModel(private val repository: AuthRepository, private val tokenStore: TokenStore) : ViewModel() {
@@ -55,10 +56,9 @@ class QuickConnectViewModel(private val repository: AuthRepository, private val 
 
     private suspend fun pollLoop(pollToken: String) {
         while (true) {
-            delay(POLL_INTERVAL_MS.milliseconds)
             try {
                 when (val result = repository.pollQuickConnect(pollToken)) {
-                    QuickConnectPollResult.Pending -> Unit
+                    QuickConnectPollResult.Pending -> delay(POLL_INTERVAL_MS.milliseconds)
 
                     is QuickConnectPollResult.Success -> {
                         tokenStore.saveTokens(result.tokens)
@@ -70,7 +70,7 @@ class QuickConnectViewModel(private val repository: AuthRepository, private val 
                         return
                     }
                 }
-            } catch (_: Exception) {
+            } catch (_: IOException) {
                 _state.update { it.copy(status = QuickConnectUiState.Status.Error) }
                 return
             }

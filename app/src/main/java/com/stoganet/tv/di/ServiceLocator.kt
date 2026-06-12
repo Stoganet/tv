@@ -20,7 +20,7 @@ class ServiceLocator(context: Context) {
 
     private val authHandler: AuthHandler by lazy { AuthHandler(tokenStore, api) }
 
-    val authRepository: AuthRepository by lazy { AuthRepository(api, rawRetrofit) }
+    val authRepository: AuthRepository by lazy { AuthRepository(api, rawRetrofit, tokenStore) }
 
     val authedRetrofit: Retrofit by lazy {
         HttpClients.retrofit(HttpClients.authedOkHttp(authHandler, authHandler))

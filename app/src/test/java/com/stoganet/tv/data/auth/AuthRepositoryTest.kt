@@ -10,6 +10,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,6 +20,7 @@ class AuthRepositoryTest {
 
     private val server = MockWebServer()
     private lateinit var repository: AuthRepository
+    private lateinit var tokenStore: TokenStore
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -30,7 +32,8 @@ class AuthRepositoryTest {
             .client(OkHttpClient())
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
-        repository = AuthRepository(retrofit.create(DefaultApi::class.java), retrofit)
+        tokenStore = TokenStore(FakeDataStore())
+        repository = AuthRepository(retrofit.create(DefaultApi::class.java), retrofit, tokenStore)
     }
 
     @AfterEach
@@ -92,11 +95,35 @@ class AuthRepositoryTest {
     }
 
     @Test
-    fun `logout returns success on 204`() = runTest {
+    fun `logout returns success and clears TokenStore on 204`() = runTest {
+        val pair = com.stoganet.tv.api.model.TokenPair(
+            accessToken = "at",
+            refreshToken = "rt",
+            user = com.stoganet.tv.api.model.User(id = "u1", email = "a@b.com", displayName = "Test"),
+        )
+        tokenStore.saveTokens(pair)
         server.enqueue(MockResponse(code = 204))
 
         val result = repository.logout("refresh-token")
 
         assertTrue(result.isSuccess)
+        assertNull(tokenStore.accessToken())
+        assertNull(tokenStore.refreshToken())
+    }
+
+    @Test
+    fun `logout returns failure and does not clear TokenStore on error`() = runTest {
+        val pair = com.stoganet.tv.api.model.TokenPair(
+            accessToken = "at",
+            refreshToken = "rt",
+            user = com.stoganet.tv.api.model.User(id = "u1", email = "a@b.com", displayName = "Test"),
+        )
+        tokenStore.saveTokens(pair)
+        server.enqueue(MockResponse(code = 401))
+
+        val result = repository.logout("refresh-token")
+
+        assertTrue(result.isFailure)
+        assertEquals("at", tokenStore.accessToken())
     }
 }

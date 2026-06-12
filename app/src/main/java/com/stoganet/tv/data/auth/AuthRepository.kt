@@ -19,7 +19,7 @@ private interface RawPollApi {
     suspend fun poll(@Body request: QuickConnectPollRequest): Response<ResponseBody>
 }
 
-class AuthRepository(private val api: DefaultApi, retrofit: Retrofit) {
+class AuthRepository(private val api: DefaultApi, retrofit: Retrofit, private val tokenStore: TokenStore) {
 
     private val rawPollApi: RawPollApi = retrofit.create(RawPollApi::class.java)
     private val json = Json { ignoreUnknownKeys = true }
@@ -55,6 +55,7 @@ class AuthRepository(private val api: DefaultApi, retrofit: Retrofit) {
     suspend fun logout(refreshToken: String): Result<Unit> = runCatching {
         val response = api.postAuthLogout(RefreshRequest(refreshToken))
         check(response.isSuccessful) { "logout failed: ${response.code()}" }
+        tokenStore.clear()
     }
 }
 
