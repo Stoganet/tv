@@ -45,9 +45,12 @@ android {
     }
 
     testOptions {
-        unitTests.all {
-            it.useJUnitPlatform()
-            it.jvmArgs("-Xmx1g")
+        unitTests {
+            isIncludeAndroidResources = true
+            all {
+                it.useJUnitPlatform()
+                it.jvmArgs("-Xmx1g")
+            }
         }
     }
 
@@ -58,6 +61,9 @@ android {
 
 kotlin {
     jvmToolchain(25)
+    // Keep JDK 25 toolchain but target JVM 21 to match compileOptions and stay within
+    // Robolectric's ASM version support ceiling (class file major version 65).
+    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
 }
 
 openApiGenerate {
@@ -171,6 +177,13 @@ dependencies {
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
     testRuntimeOnly(libs.junit.platform.launcher)
+    testRuntimeOnly(libs.junit.vintage.engine)
+    testImplementation(libs.junit4)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(platform(libs.compose.bom))
+    testImplementation(libs.compose.ui.test.junit4)
     testImplementation(libs.turbine)
     testImplementation(libs.coroutines.test)
     testImplementation(libs.okhttp.mockwebserver)
