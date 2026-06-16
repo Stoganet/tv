@@ -57,6 +57,9 @@ class TokenStoreRobolectricTest {
 
         assertEquals("access-123", store.accessToken())
         assertEquals("refresh-456", store.refreshToken())
+        val current = store.current()
+        assertEquals("u1", current.userId)
+        assertEquals("Test User", current.displayName)
     }
 
     @Test
@@ -88,5 +91,8 @@ class TokenStoreRobolectricTest {
 
         assertNull(store.accessToken())
         assertNull(store.refreshToken())
+        val cleared = store.current()
+        assertEquals("", cleared.userId)
+        assertEquals("", cleared.displayName)
     }
 }

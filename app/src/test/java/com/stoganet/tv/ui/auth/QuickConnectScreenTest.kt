@@ -1,7 +1,12 @@
 package com.stoganet.tv.ui.auth
 
+import android.content.Context
+import androidx.annotation.StringRes
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -9,6 +14,8 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.test.core.app.ApplicationProvider
+import com.stoganet.tv.R
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,12 +27,17 @@ import org.robolectric.annotation.Config
 @Config(sdk = [35])
 class QuickConnectScreenTest {
 
+    private fun str(@StringRes id: Int): String = ApplicationProvider.getApplicationContext<Context>().getString(id)
+
     @Test
     fun loadingState_showsProgressIndicator() = runComposeUiTest {
         setContent { QuickConnectScreen(state = QuickConnectUiState(), onIntent = {}) }
 
-        onNodeWithText("Sign in with Quick Connect").assertDoesNotExist()
-        onNodeWithContentDescription("Retry").assertDoesNotExist()
+        onNode(
+            SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo, ProgressBarRangeInfo.Indeterminate),
+        ).assertIsDisplayed()
+        onNodeWithText(str(R.string.login_quick_connect_title)).assertDoesNotExist()
+        onNodeWithContentDescription(str(R.string.action_retry)).assertDoesNotExist()
     }
 
     @Test
@@ -38,7 +50,7 @@ class QuickConnectScreenTest {
         }
 
         onNodeWithText("ABC123").assertIsDisplayed()
-        onNodeWithText("Sign in with Quick Connect").assertIsDisplayed()
+        onNodeWithText(str(R.string.login_quick_connect_title)).assertIsDisplayed()
     }
 
     @Test
@@ -50,8 +62,8 @@ class QuickConnectScreenTest {
             )
         }
 
-        onNodeWithText("Code expired").assertIsDisplayed()
-        onNodeWithContentDescription("Retry").assertIsDisplayed()
+        onNodeWithText(str(R.string.login_quick_connect_expired)).assertIsDisplayed()
+        onNodeWithContentDescription(str(R.string.action_retry)).assertIsDisplayed()
     }
 
     @Test
@@ -63,8 +75,8 @@ class QuickConnectScreenTest {
             )
         }
 
-        onNodeWithText("Can't reach Stoganet").assertIsDisplayed()
-        onNodeWithContentDescription("Retry").assertIsDisplayed()
+        onNodeWithText(str(R.string.error_cant_reach_server)).assertIsDisplayed()
+        onNodeWithContentDescription(str(R.string.action_retry)).assertIsDisplayed()
     }
 
     @Test
@@ -77,8 +89,8 @@ class QuickConnectScreenTest {
             )
         }
 
-        onNodeWithText("Retry").requestFocus()
-        onNodeWithText("Retry").performKeyInput { pressKey(Key.Enter) }
+        onNodeWithContentDescription(str(R.string.action_retry)).requestFocus()
+        onNodeWithContentDescription(str(R.string.action_retry)).performKeyInput { pressKey(Key.Enter) }
         waitForIdle()
 
         assertTrue(intentFired)
