@@ -10,6 +10,27 @@ screen. Talks exclusively to `api-proxy` (`https://api.stoganet.com`) — never 
 Jellyfin. Sibling repos: `api-proxy` (Go backend), `infra` (compose stack), `edge` (Caddy),
 `stogad` (Rust host daemon).
 
+## Key wiring
+
+**Two OkHttp clients:** `rawOkHttp` (no auth, used by `AuthHandler` for token refresh) and
+`authedOkHttp` (adds `Authorization: Bearer` via `AuthHandler` as OkHttp `Interceptor`; handles
+401 → refresh → retry via `AuthHandler` as OkHttp `Authenticator`). Using `authedOkHttp` inside
+the refresh path would cause an infinite 401 loop — that's why the refresh always goes through
+`rawOkHttp`.
+
+**Two NavHosts:** `AuthNavHost` (no tokens → Quick Connect screen today) and `AppNavHost`
+(authenticated → Home placeholder today). `MainActivity` reads `TokenStore` to decide which to
+show.
+
+**ServiceLocator graph:** `TokenStore` → `AuthHandler` → `authedOkHttp` → (screens use authed
+Retrofit). `rawOkHttp` is used by `AuthHandler` only. New repositories should be added to
+`ServiceLocator` and wired there.
+
+**OpenAPI client:** Generated from `openapi/openapi.yaml` (kept in sync with `api-proxy`'s spec)
+via `./gradlew :app:openApiGenerate`. Output lands in `app/build/generated/openapi/`. When
+`api-proxy` adds new endpoints, copy the updated spec here and regenerate before implementing
+the repository method.
+
 ## Architecture invariants
 
 These cross-file constraints matter when editing — violating any is a 🔴 Important in review:
