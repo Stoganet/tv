@@ -14,8 +14,8 @@ import androidx.tv.material3.Card
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import coil3.compose.AsyncImage
 
-private val PosterWidth = 120.dp
-private const val PosterAspectRatio = 2f / 3f
+private val POSTER_WIDTH = 120.dp
+private const val POSTER_ASPECT_RATIO = 2f / 3f
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -23,8 +23,8 @@ fun PosterCard(item: HomeItemUiState, modifier: Modifier = Modifier) {
     Card(
         onClick = {},
         modifier = modifier
-            .width(PosterWidth)
-            .aspectRatio(PosterAspectRatio)
+            .width(POSTER_WIDTH)
+            .aspectRatio(POSTER_ASPECT_RATIO)
             .semantics { contentDescription = item.contentDescription },
     ) {
         AsyncImage(

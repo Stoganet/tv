@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,9 +19,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Button
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -115,7 +115,12 @@ private fun PreviewContent() {
     HomeScreen(
         state = HomeUiState.Content(
             sections = persistentListOf(
-                HomeSectionUiState("recently_added_movies", R.string.home_section_recently_added_movies, items, hasMore = true),
+                HomeSectionUiState(
+                    "recently_added_movies",
+                    R.string.home_section_recently_added_movies,
+                    items,
+                    hasMore = true,
+                ),
                 HomeSectionUiState("all_tv", R.string.home_section_all_tv, items, hasMore = false),
             ),
         ),

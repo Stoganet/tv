@@ -118,22 +118,21 @@ class HomeViewModelTest {
 
     @Test
     fun `item contentDescription includes title and year`() = runTest {
+        val matrixItem = LibraryItem(
+            id = "tmdb:movie:603",
+            title = "The Matrix",
+            year = 1999,
+            type = MediaType.MOVIE,
+            poster = "https://img/1",
+            overview = "Desc",
+            state = MediaState.PLAYABLE,
+        )
         coEvery { repository.getHome() } returns Result.success(
-            HomeResponse(sections = listOf(
-                HomeSection(
-                    id = "all_movies",
-                    items = listOf(LibraryItem(
-                        id = "tmdb:movie:603",
-                        title = "The Matrix",
-                        year = 1999,
-                        type = MediaType.MOVIE,
-                        poster = "https://img/1",
-                        overview = "Desc",
-                        state = MediaState.PLAYABLE,
-                    )),
-                    hasMore = false,
+            HomeResponse(
+                sections = listOf(
+                    HomeSection(id = "all_movies", items = listOf(matrixItem), hasMore = false),
                 ),
-            )),
+            ),
         )
 
         val vm = HomeViewModel(repository)
