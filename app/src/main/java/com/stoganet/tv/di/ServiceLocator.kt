@@ -1,12 +1,11 @@
 package com.stoganet.tv.di
 
 import android.content.Context
-import com.stoganet.tv.api.DefaultApi
-import com.stoganet.tv.data.auth.AuthHandler
 import com.stoganet.tv.data.auth.AuthRepository
 import com.stoganet.tv.data.auth.TokenStore
-import com.stoganet.tv.data.net.HttpClients
-import retrofit2.Retrofit
+import com.stoganet.tv.data.net.StoganetApi
+import com.stoganet.tv.data.net.buildHttpClient
+import io.ktor.client.HttpClient
 
 class ServiceLocator(context: Context) {
 
@@ -14,15 +13,9 @@ class ServiceLocator(context: Context) {
 
     val tokenStore: TokenStore by lazy { TokenStore.create(appContext) }
 
-    private val rawRetrofit: Retrofit by lazy { HttpClients.retrofit(HttpClients.rawOkHttp) }
+    val httpClient: HttpClient by lazy { buildHttpClient(tokenStore) }
 
-    private val api: DefaultApi by lazy { rawRetrofit.create(DefaultApi::class.java) }
+    private val stoganetApi: StoganetApi by lazy { StoganetApi(httpClient) }
 
-    private val authHandler: AuthHandler by lazy { AuthHandler(tokenStore, api) }
-
-    val authRepository: AuthRepository by lazy { AuthRepository(api, rawRetrofit, tokenStore) }
-
-    val authedRetrofit: Retrofit by lazy {
-        HttpClients.retrofit(HttpClients.authedOkHttp(authHandler, authHandler))
-    }
+    val authRepository: AuthRepository by lazy { AuthRepository(stoganetApi, tokenStore) }
 }

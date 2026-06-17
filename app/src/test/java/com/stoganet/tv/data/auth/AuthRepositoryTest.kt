@@ -1,52 +1,35 @@
 package com.stoganet.tv.data.auth
 
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.stoganet.tv.api.DefaultApi
+import com.stoganet.tv.api.model.QuickConnectStartResponse
+import com.stoganet.tv.api.model.TokenPair
+import com.stoganet.tv.api.model.User
+import com.stoganet.tv.data.net.StoganetApi
+import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.Json
-import mockwebserver3.MockResponse
-import mockwebserver3.MockWebServer
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import retrofit2.Retrofit
 
 class AuthRepositoryTest {
 
-    private val server = MockWebServer()
-    private lateinit var repository: AuthRepository
+    private val api = mockk<StoganetApi>()
     private lateinit var tokenStore: TokenStore
+    private lateinit var repository: AuthRepository
 
-    private val json = Json { ignoreUnknownKeys = true }
+    private val fakeUser = User(id = "u1", email = "a@b.com", displayName = "Test")
 
     @BeforeEach
     fun setUp() {
-        server.start()
-        val retrofit = Retrofit.Builder()
-            .baseUrl(server.url("/"))
-            .client(OkHttpClient())
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-            .build()
         tokenStore = TokenStore(FakeDataStore())
-        repository = AuthRepository(retrofit.create(DefaultApi::class.java), retrofit, tokenStore)
+        repository = AuthRepository(api, tokenStore)
     }
-
-    @AfterEach
-    fun tearDown() = server.close()
 
     @Test
     fun `startQuickConnect returns success with code and pollToken`() = runTest {
-        server.enqueue(
-            MockResponse(
-                code = 200,
-                body = """{"code":"ABC123","poll_token":"tok-xyz"}""",
-            ),
-        )
+        coEvery { api.startQuickConnect() } returns QuickConnectStartResponse(code = "ABC123", pollToken = "tok-xyz")
 
         val result = repository.startQuickConnect()
 
@@ -56,8 +39,8 @@ class AuthRepositoryTest {
     }
 
     @Test
-    fun `startQuickConnect returns failure on 503`() = runTest {
-        server.enqueue(MockResponse(code = 503))
+    fun `startQuickConnect returns failure when api throws`() = runTest {
+        coEvery { api.startQuickConnect() } throws IllegalStateException("503")
 
         val result = repository.startQuickConnect()
 
@@ -65,46 +48,49 @@ class AuthRepositoryTest {
     }
 
     @Test
-    fun `pollQuickConnect returns Success on 200`() = runTest {
-        val tokenBody = """{"access_token":"at","refresh_token":"rt",""" +
-            """"user":{"id":"u1","email":"a@b.com","display_name":"Test"}}"""
-        server.enqueue(MockResponse(code = 200, body = tokenBody))
+    fun `pollQuickConnect returns Success`() = runTest {
+        val tokens = TokenPair(accessToken = "at", refreshToken = "rt", user = fakeUser)
+        coEvery { api.pollQuickConnect("tok") } returns QuickConnectPollResult.Success(tokens)
 
-        val result = repository.pollQuickConnect("tok-xyz")
+        val result = repository.pollQuickConnect("tok")
 
-        assertTrue(result is QuickConnectPollResult.Success)
-        assertEquals("at", (result as QuickConnectPollResult.Success).tokens.accessToken)
+        assertTrue(result.isSuccess)
+        assertEquals("at", (result.getOrThrow() as QuickConnectPollResult.Success).tokens.accessToken)
     }
 
     @Test
-    fun `pollQuickConnect returns Pending on 202`() = runTest {
-        server.enqueue(MockResponse(code = 202))
+    fun `pollQuickConnect returns Pending`() = runTest {
+        coEvery { api.pollQuickConnect("tok") } returns QuickConnectPollResult.Pending
 
-        val result = repository.pollQuickConnect("tok-xyz")
+        val result = repository.pollQuickConnect("tok")
 
-        assertEquals(QuickConnectPollResult.Pending, result)
+        assertEquals(Result.success(QuickConnectPollResult.Pending), result)
     }
 
     @Test
-    fun `pollQuickConnect returns Expired on 410`() = runTest {
-        server.enqueue(MockResponse(code = 410))
+    fun `pollQuickConnect returns Expired`() = runTest {
+        coEvery { api.pollQuickConnect("tok") } returns QuickConnectPollResult.Expired
 
-        val result = repository.pollQuickConnect("tok-xyz")
+        val result = repository.pollQuickConnect("tok")
 
-        assertEquals(QuickConnectPollResult.Expired, result)
+        assertEquals(Result.success(QuickConnectPollResult.Expired), result)
     }
 
     @Test
-    fun `logout returns success and clears TokenStore on 204`() = runTest {
-        val pair = com.stoganet.tv.api.model.TokenPair(
-            accessToken = "at",
-            refreshToken = "rt",
-            user = com.stoganet.tv.api.model.User(id = "u1", email = "a@b.com", displayName = "Test"),
-        )
-        tokenStore.saveTokens(pair)
-        server.enqueue(MockResponse(code = 204))
+    fun `pollQuickConnect returns failure when api throws`() = runTest {
+        coEvery { api.pollQuickConnect("tok") } throws IllegalStateException("unexpected status: 500")
 
-        val result = repository.logout("refresh-token")
+        val result = repository.pollQuickConnect("tok")
+
+        assertTrue(result.isFailure)
+    }
+
+    @Test
+    fun `logout returns success and clears tokenStore`() = runTest {
+        tokenStore.saveTokens(TokenPair(accessToken = "at", refreshToken = "rt", user = fakeUser))
+        coEvery { api.logout("rt") } returns Unit
+
+        val result = repository.logout("rt")
 
         assertTrue(result.isSuccess)
         assertNull(tokenStore.accessToken())
@@ -112,16 +98,33 @@ class AuthRepositoryTest {
     }
 
     @Test
-    fun `logout returns failure and does not clear TokenStore on error`() = runTest {
-        val pair = com.stoganet.tv.api.model.TokenPair(
-            accessToken = "at",
-            refreshToken = "rt",
-            user = com.stoganet.tv.api.model.User(id = "u1", email = "a@b.com", displayName = "Test"),
-        )
-        tokenStore.saveTokens(pair)
-        server.enqueue(MockResponse(code = 401))
+    fun `logout returns failure and does not clear tokenStore`() = runTest {
+        tokenStore.saveTokens(TokenPair(accessToken = "at", refreshToken = "rt", user = fakeUser))
+        coEvery { api.logout("rt") } throws IllegalStateException("401")
 
-        val result = repository.logout("refresh-token")
+        val result = repository.logout("rt")
+
+        assertTrue(result.isFailure)
+        assertEquals("at", tokenStore.accessToken())
+    }
+
+    @Test
+    fun `logoutAll returns success and clears tokenStore`() = runTest {
+        tokenStore.saveTokens(TokenPair(accessToken = "at", refreshToken = "rt", user = fakeUser))
+        coEvery { api.logoutAll() } returns Unit
+
+        val result = repository.logoutAll()
+
+        assertTrue(result.isSuccess)
+        assertNull(tokenStore.accessToken())
+    }
+
+    @Test
+    fun `logoutAll returns failure and does not clear tokenStore`() = runTest {
+        tokenStore.saveTokens(TokenPair(accessToken = "at", refreshToken = "rt", user = fakeUser))
+        coEvery { api.logoutAll() } throws IllegalStateException("401")
+
+        val result = repository.logoutAll()
 
         assertTrue(result.isFailure)
         assertEquals("at", tokenStore.accessToken())

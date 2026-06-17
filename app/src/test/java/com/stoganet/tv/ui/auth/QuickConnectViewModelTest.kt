@@ -50,7 +50,7 @@ class QuickConnectViewModelTest {
         coEvery { repository.startQuickConnect() } returns Result.success(
             QuickConnectStartResponse(code = "ABC123", pollToken = "tok"),
         )
-        coEvery { repository.pollQuickConnect(any()) } returns QuickConnectPollResult.Pending
+        coEvery { repository.pollQuickConnect(any()) } returns Result.success(QuickConnectPollResult.Pending)
 
         val viewModel = QuickConnectViewModel(repository, tokenStore)
         try {
@@ -72,7 +72,7 @@ class QuickConnectViewModelTest {
         coEvery { repository.startQuickConnect() } returns Result.success(
             QuickConnectStartResponse(code = "ABC123", pollToken = "tok"),
         )
-        coEvery { repository.pollQuickConnect("tok") } returns QuickConnectPollResult.Success(pair)
+        coEvery { repository.pollQuickConnect("tok") } returns Result.success(QuickConnectPollResult.Success(pair))
 
         val viewModel = QuickConnectViewModel(repository, tokenStore)
         advanceUntilIdle()
@@ -86,12 +86,26 @@ class QuickConnectViewModelTest {
         coEvery { repository.startQuickConnect() } returns Result.success(
             QuickConnectStartResponse(code = "ABC123", pollToken = "tok"),
         )
-        coEvery { repository.pollQuickConnect("tok") } returns QuickConnectPollResult.Expired
+        coEvery { repository.pollQuickConnect("tok") } returns Result.success(QuickConnectPollResult.Expired)
 
         val viewModel = QuickConnectViewModel(repository, tokenStore)
         advanceUntilIdle()
 
         assertEquals(QuickConnectUiState.Status.Expired, viewModel.state.value.status)
+    }
+
+    @Test
+    fun `poll failure emits Error status`() = runTest {
+        setMainDispatcher(testScheduler)
+        coEvery { repository.startQuickConnect() } returns Result.success(
+            QuickConnectStartResponse(code = "ABC123", pollToken = "tok"),
+        )
+        coEvery { repository.pollQuickConnect("tok") } returns Result.failure(RuntimeException("unexpected"))
+
+        val viewModel = QuickConnectViewModel(repository, tokenStore)
+        advanceUntilIdle()
+
+        assertEquals(QuickConnectUiState.Status.Error, viewModel.state.value.status)
     }
 
     @Test
@@ -110,7 +124,7 @@ class QuickConnectViewModelTest {
         coEvery { repository.startQuickConnect() } returns Result.success(
             QuickConnectStartResponse(code = "ABC123", pollToken = "tok"),
         )
-        coEvery { repository.pollQuickConnect(any()) } returns QuickConnectPollResult.Pending
+        coEvery { repository.pollQuickConnect(any()) } returns Result.success(QuickConnectPollResult.Pending)
 
         val viewModel = QuickConnectViewModel(repository, tokenStore)
         viewModel.onIntent(QuickConnectIntent.Retry)
