@@ -142,4 +142,24 @@ class StoganetApiTest {
 
         assertThrows<IllegalStateException> { api.logoutAll() }
     }
+
+    @Test
+    fun `getHome returns HomeResponse on 200`() = runTest {
+        val json = """{"sections":[{"id":"recently_added_movies","items":[],"has_more":false}]}"""
+        val engine = MockEngine { respond(json, HttpStatusCode.OK, jsonHeader) }
+        val api = buildApi(engine)
+
+        val result = api.getHome()
+
+        assertEquals(1, result.sections.size)
+        assertEquals("recently_added_movies", result.sections[0].id)
+    }
+
+    @Test
+    fun `getHome throws on non-success status`() = runTest {
+        val engine = MockEngine { respond("", HttpStatusCode.ServiceUnavailable) }
+        val api = buildApi(engine)
+
+        assertThrows<IllegalStateException> { api.getHome() }
+    }
 }
