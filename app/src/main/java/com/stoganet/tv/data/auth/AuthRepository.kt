@@ -58,9 +58,3 @@ class AuthRepository(private val api: DefaultApi, retrofit: Retrofit, private va
         tokenStore.clear()
     }
 }
-
-sealed interface QuickConnectPollResult {
-    data class Success(val tokens: TokenPair) : QuickConnectPollResult
-    data object Pending : QuickConnectPollResult
-    data object Expired : QuickConnectPollResult
-}
