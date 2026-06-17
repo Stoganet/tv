@@ -34,7 +34,7 @@ private const val SEE_MORE_ASPECT_RATIO = 2f / 3f
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun HomeScreen(state: HomeUiState, onIntent: (HomeIntent) -> Unit) {
+fun HomeScreen(state: HomeUiState, onIntent: (HomeIntent) -> Unit, onNavigateTo: (route: String) -> Unit) {
     when (state) {
         HomeUiState.Loading -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -69,7 +69,10 @@ fun HomeScreen(state: HomeUiState, onIntent: (HomeIntent) -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
                 items(state.sections, key = { it.id }) { section ->
-                    SectionRow(section = section)
+                    SectionRow(
+                        section = section,
+                        onSeeMore = section.seeMoreRoute?.let { route -> { onNavigateTo(route) } },
+                    )
                 }
             }
         }
@@ -78,7 +81,7 @@ fun HomeScreen(state: HomeUiState, onIntent: (HomeIntent) -> Unit) {
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun SectionRow(section: HomeSectionUiState) {
+private fun SectionRow(section: HomeSectionUiState, onSeeMore: (() -> Unit)?) {
     Column {
         Text(
             text = stringResource(section.titleRes),
@@ -95,6 +98,11 @@ private fun SectionRow(section: HomeSectionUiState) {
                     posterUrl = item.posterUrl,
                     contentDescription = item.contentDescription,
                 )
+            }
+            if (onSeeMore != null) {
+                item(key = "see_more") {
+                    SeeMoreCard(onClick = onSeeMore)
+                }
             }
         }
     }
@@ -145,13 +153,13 @@ private fun PreviewSeeMoreCardFocused() {
 @Preview(showBackground = true, widthDp = 1280, heightDp = 720)
 @Composable
 private fun PreviewLoading() {
-    HomeScreen(state = HomeUiState.Loading, onIntent = {})
+    HomeScreen(state = HomeUiState.Loading, onIntent = {}, onNavigateTo = {})
 }
 
 @Preview(showBackground = true, widthDp = 1280, heightDp = 720)
 @Composable
 private fun PreviewError() {
-    HomeScreen(state = HomeUiState.Error, onIntent = {})
+    HomeScreen(state = HomeUiState.Error, onIntent = {}, onNavigateTo = {})
 }
 
 @Preview(showBackground = true, widthDp = 1280, heightDp = 720)
@@ -171,9 +179,17 @@ private fun PreviewContent() {
                     items,
                     hasMore = true,
                 ),
+                HomeSectionUiState(
+                    "all_movies",
+                    R.string.home_section_all_movies,
+                    items,
+                    hasMore = false,
+                    seeMoreRoute = "library/movies",
+                ),
                 HomeSectionUiState("all_tv", R.string.home_section_all_tv, items, hasMore = false),
             ),
         ),
         onIntent = {},
+        onNavigateTo = {},
     )
 }
