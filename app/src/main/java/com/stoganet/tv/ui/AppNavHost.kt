@@ -20,7 +20,11 @@ fun AppNavHost() {
         composable("home") {
             val vm: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
             val state by vm.state.collectAsStateWithLifecycle()
-            HomeScreen(state = state, onIntent = vm::onIntent)
+            HomeScreen(
+                state = state,
+                onIntent = vm::onIntent,
+                onNavigateTo = { route -> navController.navigate(route) },
+            )
         }
         composable("library/movies") {
             val vm: LibraryViewModel = viewModel(factory = LibraryViewModel.factory(MediaType.MOVIE))
