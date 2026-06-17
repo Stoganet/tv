@@ -4,11 +4,7 @@ import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 
 @Immutable
-data class LibraryItemUiState(
-    val id: String,
-    val posterUrl: String,
-    val contentDescription: String,
-)
+data class LibraryItemUiState(val id: String, val posterUrl: String, val contentDescription: String)
 
 sealed interface LibraryUiState {
     data object Loading : LibraryUiState
