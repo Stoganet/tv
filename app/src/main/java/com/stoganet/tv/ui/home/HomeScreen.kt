@@ -36,7 +36,7 @@ fun HomeScreen(state: HomeUiState, onIntent: (HomeIntent) -> Unit) {
         }
 
         HomeUiState.Error -> {
-            val retryLabel = stringResource(R.string.home_retry_button)
+            val retryLabel = stringResource(R.string.action_retry)
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,

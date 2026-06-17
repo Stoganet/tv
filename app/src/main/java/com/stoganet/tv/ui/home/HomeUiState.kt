@@ -17,6 +17,8 @@ data class HomeItemUiState(val id: String, val posterUrl: String, val contentDes
 
 sealed interface HomeUiState {
     data object Loading : HomeUiState
+
+    @Immutable
     data class Content(val sections: ImmutableList<HomeSectionUiState>) : HomeUiState
     data object Error : HomeUiState
 }

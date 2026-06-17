@@ -25,5 +25,4 @@
     <string name="home_section_all_tv">All TV Shows</string>
     <string name="home_section_unknown">More Content</string>
     <string name="home_error_message">Could not load content. Please try again.</string>
-    <string name="home_retry_button">Retry</string>
 </resources>

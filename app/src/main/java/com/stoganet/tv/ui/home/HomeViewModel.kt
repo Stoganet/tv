@@ -15,6 +15,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
@@ -33,15 +34,15 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
     }
 
     private fun loadHome() {
-        _state.value = HomeUiState.Loading
+        _state.update { HomeUiState.Loading }
         viewModelScope.launch {
             repository.getHome()
                 .onSuccess { response ->
                     val sections = response.sections.map { it.toUiState() }.toImmutableList()
-                    _state.value = HomeUiState.Content(sections)
+                    _state.update { HomeUiState.Content(sections) }
                 }
                 .onFailure {
-                    _state.value = HomeUiState.Error
+                    _state.update { HomeUiState.Error }
                 }
         }
     }
