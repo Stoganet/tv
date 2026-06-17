@@ -52,6 +52,7 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
         titleRes = sectionTitleRes(id),
         items = items.map { it.toUiState() }.toImmutableList(),
         hasMore = hasMore,
+        seeMoreRoute = sectionSeeMoreRoute(id),
     )
 
     private fun LibraryItem.toUiState() = HomeItemUiState(
@@ -67,6 +68,12 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
             "all_movies" -> R.string.home_section_all_movies
             "all_tv" -> R.string.home_section_all_tv
             else -> R.string.home_section_unknown
+        }
+
+        private fun sectionSeeMoreRoute(id: String) = when (id) {
+            "all_movies" -> "library/movies"
+            "all_tv" -> "library/tv"
+            else -> null
         }
 
         val Factory: ViewModelProvider.Factory = viewModelFactory {

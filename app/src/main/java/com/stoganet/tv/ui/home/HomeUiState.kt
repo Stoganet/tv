@@ -10,6 +10,7 @@ data class HomeSectionUiState(
     @param:StringRes val titleRes: Int,
     val items: ImmutableList<HomeItemUiState>,
     val hasMore: Boolean,
+    val seeMoreRoute: String? = null,
 )
 
 @Immutable

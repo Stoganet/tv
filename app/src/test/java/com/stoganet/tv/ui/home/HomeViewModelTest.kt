@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -114,6 +115,39 @@ class HomeViewModelTest {
 
         val section = (vm.state.value as HomeUiState.Content).sections[0]
         assertEquals(R.string.home_section_unknown, section.titleRes)
+    }
+
+    @Test
+    fun `all_movies section has seeMoreRoute library-movies`() = runTest {
+        coEvery { repository.getHome() } returns Result.success(fakeResponse("all_movies"))
+
+        val vm = HomeViewModel(repository)
+        advanceUntilIdle()
+
+        val section = (vm.state.value as HomeUiState.Content).sections[0]
+        assertEquals("library/movies", section.seeMoreRoute)
+    }
+
+    @Test
+    fun `all_tv section has seeMoreRoute library-tv`() = runTest {
+        coEvery { repository.getHome() } returns Result.success(fakeResponse("all_tv"))
+
+        val vm = HomeViewModel(repository)
+        advanceUntilIdle()
+
+        val section = (vm.state.value as HomeUiState.Content).sections[0]
+        assertEquals("library/tv", section.seeMoreRoute)
+    }
+
+    @Test
+    fun `recently_added_movies section has null seeMoreRoute`() = runTest {
+        coEvery { repository.getHome() } returns Result.success(fakeResponse("recently_added_movies"))
+
+        val vm = HomeViewModel(repository)
+        advanceUntilIdle()
+
+        val section = (vm.state.value as HomeUiState.Content).sections[0]
+        assertNull(section.seeMoreRoute)
     }
 
     @Test

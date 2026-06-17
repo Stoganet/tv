@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -21,11 +23,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Button
+import androidx.tv.material3.Card
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.stoganet.tv.R
 import kotlinx.collections.immutable.persistentListOf
+
+private const val SEE_MORE_ASPECT_RATIO = 2f / 3f
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -93,6 +98,48 @@ private fun SectionRow(section: HomeSectionUiState) {
             }
         }
     }
+}
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun SeeMoreCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val label = stringResource(R.string.home_see_more)
+    Card(
+        onClick = onClick,
+        modifier = modifier
+            .width(120.dp)
+            .aspectRatio(SEE_MORE_ASPECT_RATIO)
+            .semantics { contentDescription = label },
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "→",
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewSeeMoreCardUnfocused() {
+    SeeMoreCard(onClick = {})
+}
+
+@Preview
+@Composable
+private fun PreviewSeeMoreCardFocused() {
+    SeeMoreCard(onClick = {})
 }
 
 @Preview(showBackground = true, widthDp = 1280, heightDp = 720)

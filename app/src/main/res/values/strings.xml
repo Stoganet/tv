@@ -24,6 +24,7 @@
     <string name="home_section_all_movies">All Movies</string>
     <string name="home_section_all_tv">All TV Shows</string>
     <string name="home_section_unknown">More Content</string>
+    <string name="home_see_more">See all</string>
     <string name="home_error_message">Could not load content. Please try again.</string>
     <string name="library_error_message">Could not load library. Please try again.</string>
     <string name="library_load_more_error">Couldn\'t load more items.</string>
