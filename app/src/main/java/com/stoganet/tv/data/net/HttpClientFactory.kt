@@ -41,6 +41,7 @@ fun buildHttpClient(tokenStore: TokenStore): HttpClient = HttpClient(OkHttp) {
 }
 
 internal fun HttpClientConfig<*>.configurePlugins(tokenStore: TokenStore, baseUrl: String) {
+    val apiHost = io.ktor.http.Url(baseUrl).host
     install(ContentNegotiation) {
         json(
             Json {
@@ -52,7 +53,7 @@ internal fun HttpClientConfig<*>.configurePlugins(tokenStore: TokenStore, baseUr
     }
     install(Auth) {
         bearer {
-            sendWithoutRequest { true }
+            sendWithoutRequest { request -> request.url.host == apiHost }
             loadTokens {
                 val access = tokenStore.accessToken() ?: return@loadTokens null
                 val refresh = tokenStore.refreshToken() ?: return@loadTokens null

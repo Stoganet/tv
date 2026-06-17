@@ -12,19 +12,19 @@ Jellyfin. Sibling repos: `api-proxy` (Go backend), `infra` (compose stack), `edg
 
 ## Key wiring
 
-**Two OkHttp clients:** `rawOkHttp` (no auth, used by `AuthHandler` for token refresh) and
-`authedOkHttp` (adds `Authorization: Bearer` via `AuthHandler` as OkHttp `Interceptor`; handles
-401 → refresh → retry via `AuthHandler` as OkHttp `Authenticator`). Using `authedOkHttp` inside
-the refresh path would cause an infinite 401 loop — that's why the refresh always goes through
-`rawOkHttp`.
+**Single Ktor `HttpClient`:** built by `HttpClientFactory.buildHttpClient(tokenStore)` with the
+Ktor `Auth` plugin (bearer). `loadTokens` reads from `TokenStore`; `refreshTokens` posts to
+`auth/refresh` and marks the request with `markAsRefreshTokenRequest()` so the Auth plugin does
+not retry the refresh on a 401, preventing infinite loops. `sendWithoutRequest` is scoped to the
+API host so the `Authorization` header is never sent to third-party URLs. The same client instance
+is reused by Coil via `KtorNetworkFetcherFactory`.
 
 **Two NavHosts:** `AuthNavHost` (no tokens → Quick Connect screen today) and `AppNavHost`
 (authenticated → Home placeholder today). `MainActivity` reads `TokenStore` to decide which to
 show.
 
-**ServiceLocator graph:** `TokenStore` → `AuthHandler` → `authedOkHttp` → (screens use authed
-Retrofit). `rawOkHttp` is used by `AuthHandler` only. New repositories should be added to
-`ServiceLocator` and wired there.
+**ServiceLocator graph:** `TokenStore` → `HttpClient` → `StoganetApi` → repositories. New
+repositories should be added to `ServiceLocator` and wired there.
 
 **OpenAPI client:** Generated from `openapi/openapi.yaml` (kept in sync with `api-proxy`'s spec)
 via `./gradlew :app:openApiGenerate`. Output lands in `app/build/generated/openapi/`. When
@@ -35,10 +35,10 @@ the repository method.
 
 These cross-file constraints matter when editing — violating any is a 🔴 Important in review:
 
-- **`AuthInterceptor` uses a separate `refreshClient`** — calling the authed client from inside
-  the interceptor creates an infinite 401 loop.
-- **Token refresh is serialised by `refreshMutex`** — N parallel 401s must trigger exactly one
-  refresh; the other N-1 see the new token and retry.
+- **`refreshTokens` calls `markAsRefreshTokenRequest()`** — without it, a 401 on the refresh
+  request triggers another refresh attempt → infinite loop.
+- **Token refresh is serialised by Ktor's `Auth` plugin** — N parallel 401s trigger exactly one
+  `refreshTokens` call; the other N-1 see the new token and retry automatically.
 - **All token access goes through `TokenStore`** (Proto DataStore + Tink). No raw
   `SharedPreferences`, no direct file I/O, no globals.
 - **`UiState` is immutable** and updated only via `_state.update { it.copy(...) }`.
