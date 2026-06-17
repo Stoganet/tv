@@ -8,7 +8,9 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.stoganet.tv.di.ServiceLocator
 import timber.log.Timber
 
-class StoganetApp : Application(), SingletonImageLoader.Factory {
+class StoganetApp :
+    Application(),
+    SingletonImageLoader.Factory {
 
     lateinit var services: ServiceLocator
         private set
@@ -22,10 +24,9 @@ class StoganetApp : Application(), SingletonImageLoader.Factory {
     }
 
     @OptIn(coil3.annotation.ExperimentalCoilApi::class)
-    override fun newImageLoader(context: PlatformContext): ImageLoader =
-        ImageLoader.Builder(context)
-            .components {
-                add(KtorNetworkFetcherFactory(services.httpClient))
-            }
-            .build()
+    override fun newImageLoader(context: PlatformContext): ImageLoader = ImageLoader.Builder(context)
+        .components {
+            add(KtorNetworkFetcherFactory(services.httpClient))
+        }
+        .build()
 }

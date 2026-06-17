@@ -98,6 +98,8 @@ tasks.named("openApiGenerate") {
     val unusedSupportingFiles = listOf(
         "src/main/kotlin/com/stoganet/tv/api/infrastructure/ApiClient.kt",
         "src/main/kotlin/com/stoganet/tv/api/auth",
+        "src/main/kotlin/com/stoganet/tv/api/DefaultApi.kt",
+        "src/main/kotlin/com/stoganet/tv/api/infrastructure/ResponseExt.kt",
     )
     val outDirProvider = openApiOutDir
     doLast {
@@ -158,10 +160,6 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.tv.material)
 
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.kotlinx.serialization)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.content.negotiation)
@@ -192,7 +190,6 @@ dependencies {
     testImplementation(libs.compose.ui.test.junit4)
     testImplementation(libs.turbine)
     testImplementation(libs.coroutines.test)
-    testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.ktor.client.mock)
     testImplementation(libs.mockk)
 

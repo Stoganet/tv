@@ -9,8 +9,7 @@ class AuthRepository(private val api: StoganetApi, private val tokenStore: Token
         api.startQuickConnect()
     }
 
-    suspend fun pollQuickConnect(pollToken: String): QuickConnectPollResult =
-        api.pollQuickConnect(pollToken)
+    suspend fun pollQuickConnect(pollToken: String): QuickConnectPollResult = api.pollQuickConnect(pollToken)
 
     suspend fun logout(refreshToken: String): Result<Unit> = runCatching {
         api.logout(refreshToken)

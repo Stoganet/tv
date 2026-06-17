@@ -25,24 +25,30 @@ import java.util.concurrent.TimeUnit
 
 const val BASE_URL = "https://api.stoganet.com/"
 
+private const val CONNECT_TIMEOUT_SECONDS = 10L
+private const val READ_TIMEOUT_SECONDS = 15L
+private const val WRITE_TIMEOUT_SECONDS = 15L
+
 fun buildHttpClient(tokenStore: TokenStore): HttpClient = HttpClient(OkHttp) {
     configurePlugins(tokenStore, BASE_URL)
     engine {
         config {
-            connectTimeout(10, TimeUnit.SECONDS)
-            readTimeout(15, TimeUnit.SECONDS)
-            writeTimeout(15, TimeUnit.SECONDS)
+            connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            writeTimeout(WRITE_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         }
     }
 }
 
 internal fun HttpClientConfig<*>.configurePlugins(tokenStore: TokenStore, baseUrl: String) {
     install(ContentNegotiation) {
-        json(Json {
-            ignoreUnknownKeys = true
-            explicitNulls = false
-            encodeDefaults = true
-        })
+        json(
+            Json {
+                ignoreUnknownKeys = true
+                explicitNulls = false
+                encodeDefaults = true
+            },
+        )
     }
     install(Auth) {
         bearer {

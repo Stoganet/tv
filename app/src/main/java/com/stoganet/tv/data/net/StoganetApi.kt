@@ -11,6 +11,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 
@@ -38,10 +39,10 @@ class StoganetApi(private val client: HttpClient, private val baseUrl: String = 
             contentType(ContentType.Application.Json)
             setBody(QuickConnectPollRequest(pollToken = pollToken))
         }
-        return when (response.status.value) {
-            200 -> QuickConnectPollResult.Success(response.body())
-            202 -> QuickConnectPollResult.Pending
-            410 -> QuickConnectPollResult.Expired
+        return when (response.status) {
+            HttpStatusCode.OK -> QuickConnectPollResult.Success(response.body())
+            HttpStatusCode.Accepted -> QuickConnectPollResult.Pending
+            HttpStatusCode.Gone -> QuickConnectPollResult.Expired
             else -> error("Unexpected poll status: ${response.status.value}")
         }
     }

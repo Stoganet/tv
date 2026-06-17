@@ -61,11 +61,13 @@ class AuthPluginTest {
                     HttpStatusCode.Unauthorized,
                     headersOf(HttpHeaders.WWWAuthenticate, "Bearer realm=\"test\""),
                 )
+
                 request.url.encodedPath.contains("refresh") -> respond(
                     tokenPairJson("new-access", "new-refresh"),
                     HttpStatusCode.OK,
                     headersOf(HttpHeaders.ContentType, "application/json"),
                 )
+
                 else -> respond("OK", HttpStatusCode.OK)
             }
         }
@@ -91,6 +93,7 @@ class AuthPluginTest {
                     HttpStatusCode.Unauthorized,
                     headersOf(HttpHeaders.WWWAuthenticate, "Bearer realm=\"test\""),
                 )
+
                 else -> respond("", HttpStatusCode.Unauthorized)
             }
         }
