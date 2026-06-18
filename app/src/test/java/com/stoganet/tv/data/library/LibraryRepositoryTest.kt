@@ -25,7 +25,7 @@ class LibraryRepositoryTest {
     fun `getLibrary returns success when api succeeds`() = runTest {
         coEvery { api.getLibrary(any(), any(), any()) } returns emptyResponse()
 
-        val result = repository.getLibrary()
+        val result = repository.getLibrary(limit = 100)
 
         assertTrue(result.isSuccess)
     }
@@ -34,7 +34,7 @@ class LibraryRepositoryTest {
     fun `getLibrary returns failure when api throws`() = runTest {
         coEvery { api.getLibrary(any(), any(), any()) } throws RuntimeException("error")
 
-        val result = repository.getLibrary()
+        val result = repository.getLibrary(limit = 100)
 
         assertTrue(result.isFailure)
     }
