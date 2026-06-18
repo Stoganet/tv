@@ -34,6 +34,8 @@ import com.stoganet.tv.ui.home.HomeScreen
 import com.stoganet.tv.ui.home.HomeViewModel
 import com.stoganet.tv.ui.library.LibraryScreen
 import com.stoganet.tv.ui.library.LibraryViewModel
+import com.stoganet.tv.ui.player.PlayerScreen
+import com.stoganet.tv.ui.player.PlayerViewModel
 
 @Suppress("LongMethod")
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -97,8 +99,18 @@ fun AppNavHost() {
                 onNavigateToPlayer = { navController.navigate(AppRoutes.player(id)) },
             )
         }
-        composable(AppRoutes.PLAYER) {
-            // TODO
+        composable(AppRoutes.PLAYER) { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: return@composable
+            val vm: PlayerViewModel = viewModel(factory = PlayerViewModel.factory(id))
+            val state by vm.state.collectAsStateWithLifecycle()
+            PlayerScreen(
+                state = state,
+                player = vm.player,
+                onBack = {
+                    vm.player.stop()
+                    navController.popBackStack()
+                },
+            )
         }
     }
 }
