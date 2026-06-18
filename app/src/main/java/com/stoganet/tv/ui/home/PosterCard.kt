@@ -19,16 +19,16 @@ private const val POSTER_ASPECT_RATIO = 2f / 3f
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun PosterCard(item: HomeItemUiState, modifier: Modifier = Modifier) {
+fun PosterCard(posterUrl: String, contentDescription: String, modifier: Modifier = Modifier) {
     Card(
         onClick = {},
         modifier = modifier
             .width(POSTER_WIDTH)
             .aspectRatio(POSTER_ASPECT_RATIO)
-            .semantics { contentDescription = item.contentDescription },
+            .semantics { this.contentDescription = contentDescription },
     ) {
         AsyncImage(
-            model = item.posterUrl,
+            model = posterUrl,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),
@@ -40,10 +40,7 @@ fun PosterCard(item: HomeItemUiState, modifier: Modifier = Modifier) {
 @Composable
 private fun PreviewPosterCard() {
     PosterCard(
-        item = HomeItemUiState(
-            id = "tmdb:movie:603",
-            posterUrl = "",
-            contentDescription = "The Matrix (1999)",
-        ),
+        posterUrl = "",
+        contentDescription = "The Matrix (1999)",
     )
 }

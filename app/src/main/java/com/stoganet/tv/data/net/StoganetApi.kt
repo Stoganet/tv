@@ -1,7 +1,9 @@
 package com.stoganet.tv.data.net
 
 import com.stoganet.tv.api.model.HomeResponse
+import com.stoganet.tv.api.model.LibraryListResponse
 import com.stoganet.tv.api.model.LoginRequest
+import com.stoganet.tv.api.model.MediaType
 import com.stoganet.tv.api.model.QuickConnectPollRequest
 import com.stoganet.tv.api.model.QuickConnectStartResponse
 import com.stoganet.tv.api.model.RefreshRequest
@@ -10,6 +12,7 @@ import com.stoganet.tv.data.auth.QuickConnectPollResult
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -65,6 +68,16 @@ class StoganetApi(private val client: HttpClient, private val baseUrl: String = 
     suspend fun getHome(): HomeResponse {
         val response = client.get("${baseUrl}home")
         check(response.status.isSuccess()) { "getHome failed: ${response.status.value}" }
+        return response.body()
+    }
+
+    suspend fun getLibrary(type: MediaType? = null, cursor: String? = null, limit: Int): LibraryListResponse {
+        val response = client.get("${baseUrl}library") {
+            type?.let { parameter("type", it.value) }
+            cursor?.let { parameter("cursor", it) }
+            parameter("limit", limit)
+        }
+        check(response.status.isSuccess()) { "getLibrary failed: ${response.status.value}" }
         return response.body()
     }
 }

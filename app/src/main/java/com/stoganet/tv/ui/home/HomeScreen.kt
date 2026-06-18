@@ -86,7 +86,10 @@ private fun SectionRow(section: HomeSectionUiState) {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             items(section.items, key = { it.id }) { item ->
-                PosterCard(item = item)
+                PosterCard(
+                    posterUrl = item.posterUrl,
+                    contentDescription = item.contentDescription,
+                )
             }
         }
     }

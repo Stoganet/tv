@@ -30,3 +30,8 @@ docs/superpowers/
 # OS
 .DS_Store
 Thumbs.db
+
+# ai
+.claude/settings.local.json
+.claude/skills/
+docs/internal/

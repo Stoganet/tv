@@ -1,5 +1,6 @@
 package com.stoganet.tv.data.net
 
+import com.stoganet.tv.api.model.MediaType
 import com.stoganet.tv.data.auth.QuickConnectPollResult
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -161,5 +162,50 @@ class StoganetApiTest {
         val api = buildApi(engine)
 
         assertThrows<IllegalStateException> { api.getHome() }
+    }
+
+    @Test
+    fun `getLibrary returns LibraryListResponse on 200`() = runTest {
+        val json = """{"items":[],"total":0}"""
+        val engine = MockEngine { respond(json, HttpStatusCode.OK, jsonHeader) }
+        val api = buildApi(engine)
+
+        val result = api.getLibrary(limit = 100)
+
+        assertEquals(0, result.total)
+        assertEquals(0, result.items.size)
+    }
+
+    @Test
+    fun `getLibrary throws on non-success status`() = runTest {
+        val engine = MockEngine { respond("", HttpStatusCode.ServiceUnavailable) }
+        val api = buildApi(engine)
+
+        assertThrows<IllegalStateException> { api.getLibrary(limit = 100) }
+    }
+
+    @Test
+    fun `getLibrary sends type and limit query params`() = runTest {
+        val json = """{"items":[],"total":0}"""
+        val engine = MockEngine { request ->
+            assertEquals("movie", request.url.parameters["type"])
+            assertEquals("50", request.url.parameters["limit"])
+            respond(json, HttpStatusCode.OK, jsonHeader)
+        }
+        val api = buildApi(engine)
+
+        api.getLibrary(type = MediaType.MOVIE, limit = 50)
+    }
+
+    @Test
+    fun `getLibrary sends cursor query param`() = runTest {
+        val json = """{"items":[],"total":0}"""
+        val engine = MockEngine { request ->
+            assertEquals("tok-123", request.url.parameters["cursor"])
+            respond(json, HttpStatusCode.OK, jsonHeader)
+        }
+        val api = buildApi(engine)
+
+        api.getLibrary(cursor = "tok-123", limit = 100)
     }
 }
