@@ -242,7 +242,7 @@ private fun CastSection(cast: ImmutableList<CastMemberUiState>) {
             contentPadding = PaddingValues(end = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            items(cast, key = { it.name }) { member ->
+            items(cast, key = { "${it.name}:${it.role}" }) { member ->
                 Column {
                     Text(
                         text = member.name,

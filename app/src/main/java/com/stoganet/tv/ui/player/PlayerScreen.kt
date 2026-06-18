@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.onKeyEvent
@@ -60,17 +62,17 @@ fun PlayerScreen(state: PlayerUiState, player: ExoPlayer, onBack: () -> Unit, mo
         }
 
         PlayerUiState.Ready -> {
-            var playerViewRef: PlayerView? = null
+            val playerViewRef = remember { mutableStateOf<PlayerView?>(null) }
             AndroidView(
                 modifier = modifier
                     .fillMaxSize()
                     .focusable()
                     .onKeyEvent { keyEvent ->
-                        playerViewRef?.dispatchKeyEvent(keyEvent.nativeKeyEvent) ?: false
+                        playerViewRef.value?.dispatchKeyEvent(keyEvent.nativeKeyEvent) ?: false
                     },
                 factory = { context ->
                     PlayerView(context).also { pv ->
-                        playerViewRef = pv
+                        playerViewRef.value = pv
                         pv.player = player
                         pv.keepScreenOn = true
                     }
