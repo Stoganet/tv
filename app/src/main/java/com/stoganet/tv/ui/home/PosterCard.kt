@@ -19,9 +19,9 @@ private const val POSTER_ASPECT_RATIO = 2f / 3f
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun PosterCard(posterUrl: String, contentDescription: String, modifier: Modifier = Modifier) {
+fun PosterCard(posterUrl: String, contentDescription: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
-        onClick = {},
+        onClick = onClick,
         modifier = modifier
             .width(POSTER_WIDTH)
             .aspectRatio(POSTER_ASPECT_RATIO)
@@ -42,5 +42,6 @@ private fun PreviewPosterCard() {
     PosterCard(
         posterUrl = "",
         contentDescription = "The Matrix (1999)",
+        onClick = {},
     )
 }

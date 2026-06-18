@@ -78,6 +78,7 @@ fun HomeScreen(
                     SectionRow(
                         section = section,
                         onSeeMore = section.seeMoreRoute?.let { route -> { onNavigateTo(route) } },
+                        onNavigateToDetail = { id -> onNavigateTo(AppRoutes.detail(id)) },
                     )
                 }
             }
@@ -87,7 +88,11 @@ fun HomeScreen(
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun SectionRow(section: HomeSectionUiState, onSeeMore: (() -> Unit)?) {
+private fun SectionRow(
+    section: HomeSectionUiState,
+    onSeeMore: (() -> Unit)?,
+    onNavigateToDetail: (id: String) -> Unit,
+) {
     Column {
         Text(
             text = stringResource(section.titleRes),
@@ -103,6 +108,7 @@ private fun SectionRow(section: HomeSectionUiState, onSeeMore: (() -> Unit)?) {
                 PosterCard(
                     posterUrl = item.posterUrl,
                     contentDescription = item.contentDescription,
+                    onClick = { onNavigateToDetail(item.id) },
                 )
             }
             if (onSeeMore != null) {

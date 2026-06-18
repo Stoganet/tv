@@ -33,6 +33,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.stoganet.tv.R
+import com.stoganet.tv.ui.AppRoutes
 import com.stoganet.tv.ui.home.PosterCard
 import kotlinx.collections.immutable.persistentListOf
 
@@ -40,7 +41,12 @@ private const val GRID_COLUMNS = 6
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun LibraryScreen(state: LibraryUiState, onIntent: (LibraryIntent) -> Unit, modifier: Modifier = Modifier) {
+fun LibraryScreen(
+    state: LibraryUiState,
+    onIntent: (LibraryIntent) -> Unit,
+    onNavigateTo: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     when (state) {
         LibraryUiState.Loading -> Box(
             modifier = modifier.fillMaxSize(),
@@ -71,7 +77,12 @@ fun LibraryScreen(state: LibraryUiState, onIntent: (LibraryIntent) -> Unit, modi
             }
         }
 
-        is LibraryUiState.Content -> LibraryGrid(state = state, onIntent = onIntent, modifier = modifier)
+        is LibraryUiState.Content -> LibraryGrid(
+            state = state,
+            onIntent = onIntent,
+            onNavigateTo = onNavigateTo,
+            modifier = modifier,
+        )
     }
 }
 
@@ -79,6 +90,7 @@ fun LibraryScreen(state: LibraryUiState, onIntent: (LibraryIntent) -> Unit, modi
 private fun LibraryGrid(
     state: LibraryUiState.Content,
     onIntent: (LibraryIntent) -> Unit,
+    onNavigateTo: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val currentOnIntent by rememberUpdatedState(onIntent)
@@ -105,6 +117,7 @@ private fun LibraryGrid(
             PosterCard(
                 posterUrl = item.posterUrl,
                 contentDescription = item.contentDescription,
+                onClick = { onNavigateTo(AppRoutes.detail(item.id)) },
             )
         }
         if (state.isLoadingMore) {
@@ -140,13 +153,13 @@ private fun LibraryGrid(
 @Preview(showBackground = true, widthDp = 1280, heightDp = 720)
 @Composable
 private fun PreviewLoading() {
-    LibraryScreen(state = LibraryUiState.Loading, onIntent = {})
+    LibraryScreen(state = LibraryUiState.Loading, onIntent = {}, onNavigateTo = {})
 }
 
 @Preview(showBackground = true, widthDp = 1280, heightDp = 720)
 @Composable
 private fun PreviewError() {
-    LibraryScreen(state = LibraryUiState.Error, onIntent = {})
+    LibraryScreen(state = LibraryUiState.Error, onIntent = {}, onNavigateTo = {})
 }
 
 @Preview(showBackground = true, widthDp = 1280, heightDp = 720)
@@ -163,6 +176,7 @@ private fun PreviewContent() {
     LibraryScreen(
         state = LibraryUiState.Content(items = items, hasMore = false, isLoadingMore = false),
         onIntent = {},
+        onNavigateTo = {},
     )
 }
 
@@ -176,5 +190,6 @@ private fun PreviewContentLoadingMore() {
     LibraryScreen(
         state = LibraryUiState.Content(items = items, hasMore = true, isLoadingMore = true),
         onIntent = {},
+        onNavigateTo = {},
     )
 }

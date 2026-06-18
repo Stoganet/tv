@@ -32,7 +32,7 @@ class LibraryScreenTest {
 
     @Test
     fun loadingState_showsProgressIndicator() = runComposeUiTest {
-        setContent { LibraryScreen(state = LibraryUiState.Loading, onIntent = {}) }
+        setContent { LibraryScreen(state = LibraryUiState.Loading, onIntent = {}, onNavigateTo = {}) }
 
         onNode(
             SemanticsMatcher.expectValue(
@@ -44,14 +44,14 @@ class LibraryScreenTest {
 
     @Test
     fun errorState_showsErrorMessage() = runComposeUiTest {
-        setContent { LibraryScreen(state = LibraryUiState.Error, onIntent = {}) }
+        setContent { LibraryScreen(state = LibraryUiState.Error, onIntent = {}, onNavigateTo = {}) }
 
         onNodeWithText(str(R.string.library_error_message)).assertIsDisplayed()
     }
 
     @Test
     fun errorState_showsRetryButton() = runComposeUiTest {
-        setContent { LibraryScreen(state = LibraryUiState.Error, onIntent = {}) }
+        setContent { LibraryScreen(state = LibraryUiState.Error, onIntent = {}, onNavigateTo = {}) }
 
         onNodeWithContentDescription(str(R.string.action_retry)).assertIsDisplayed()
     }
@@ -63,6 +63,7 @@ class LibraryScreenTest {
             LibraryScreen(
                 state = LibraryUiState.Error,
                 onIntent = { if (it == LibraryIntent.Retry) intentFired = true },
+                onNavigateTo = {},
             )
         }
 
@@ -89,6 +90,7 @@ class LibraryScreenTest {
                     isLoadingMore = false,
                 ),
                 onIntent = {},
+                onNavigateTo = {},
             )
         }
 
@@ -108,6 +110,7 @@ class LibraryScreenTest {
                     hasLoadMoreError = true,
                 ),
                 onIntent = {},
+                onNavigateTo = {},
             )
         }
 
