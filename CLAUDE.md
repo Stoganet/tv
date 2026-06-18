@@ -58,6 +58,15 @@ These cross-file constraints matter when editing — violating any is a 🔴 Imp
 - **Strings live in `res/values/strings.xml`.** No hardcoded user-visible English in Compose code.
 - **No telemetry / crash reporting / analytics.**
 - **CI actions are SHA-pinned**, never tag-pinned.
+- **Never call `runBlocking` on the main thread.** ViewModel factories
+  (`initializer {}` blocks), `@Composable` functions, and any code not inside a
+  coroutine execute on the main thread. Blocking there risks ANR. Use
+  `viewModelScope.launch` or `withContext(Dispatchers.IO)` instead. Exception:
+  lambdas passed to background-thread APIs where the library documents the
+  callback runs off-main (e.g. `DataSource.Factory` in Media3 — ExoPlayer calls
+  `createDataSource()` on its loader thread).
+- **ViewModel factory `initializer {}` runs on the main thread** — no blocking
+  I/O, no `runBlocking` over suspend functions there.
 
 ## Common operations
 
