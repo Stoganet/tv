@@ -7,6 +7,7 @@ import kotlinx.collections.immutable.ImmutableList
 data class LibraryItemUiState(val id: String, val posterUrl: String, val contentDescription: String)
 
 sealed interface LibraryUiState {
+    @Immutable
     data object Loading : LibraryUiState
 
     @Immutable
@@ -14,7 +15,9 @@ sealed interface LibraryUiState {
         val items: ImmutableList<LibraryItemUiState>,
         val hasMore: Boolean,
         val isLoadingMore: Boolean,
+        val hasLoadMoreError: Boolean = false,
     ) : LibraryUiState
 
+    @Immutable
     data object Error : LibraryUiState
 }

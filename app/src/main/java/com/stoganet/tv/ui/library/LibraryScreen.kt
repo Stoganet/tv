@@ -77,10 +77,11 @@ fun LibraryScreen(state: LibraryUiState, onIntent: (LibraryIntent) -> Unit) {
 @Composable
 private fun LibraryGrid(state: LibraryUiState.Content, onIntent: (LibraryIntent) -> Unit) {
     val gridState = rememberLazyGridState()
-    val shouldLoadMore by remember {
+    val shouldLoadMore by remember(state.items.size) {
         derivedStateOf {
-            val last = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            last >= state.items.size - GRID_COLUMNS * 2
+            val info = gridState.layoutInfo.visibleItemsInfo
+            if (info.isEmpty()) return@derivedStateOf false
+            info.last().index >= state.items.size - GRID_COLUMNS * 2
         }
     }
     LaunchedEffect(shouldLoadMore) {
@@ -109,6 +110,21 @@ private fun LibraryGrid(state: LibraryUiState.Content, onIntent: (LibraryIntent)
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
+                }
+            }
+        }
+        if (state.hasLoadMoreError) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(R.string.library_load_more_error),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
             }
         }

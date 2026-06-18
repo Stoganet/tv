@@ -170,7 +170,7 @@ class StoganetApiTest {
         val engine = MockEngine { respond(json, HttpStatusCode.OK, jsonHeader) }
         val api = buildApi(engine)
 
-        val result = api.getLibrary()
+        val result = api.getLibrary(limit = 100)
 
         assertEquals(0, result.total)
         assertEquals(0, result.items.size)
@@ -181,7 +181,7 @@ class StoganetApiTest {
         val engine = MockEngine { respond("", HttpStatusCode.ServiceUnavailable) }
         val api = buildApi(engine)
 
-        assertThrows<IllegalStateException> { api.getLibrary() }
+        assertThrows<IllegalStateException> { api.getLibrary(limit = 100) }
     }
 
     @Test
@@ -195,5 +195,17 @@ class StoganetApiTest {
         val api = buildApi(engine)
 
         api.getLibrary(type = MediaType.MOVIE, limit = 50)
+    }
+
+    @Test
+    fun `getLibrary sends cursor query param`() = runTest {
+        val json = """{"items":[],"total":0}"""
+        val engine = MockEngine { request ->
+            assertEquals("tok-123", request.url.parameters["cursor"])
+            respond(json, HttpStatusCode.OK, jsonHeader)
+        }
+        val api = buildApi(engine)
+
+        api.getLibrary(cursor = "tok-123", limit = 100)
     }
 }

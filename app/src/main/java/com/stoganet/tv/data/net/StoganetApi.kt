@@ -71,7 +71,7 @@ class StoganetApi(private val client: HttpClient, private val baseUrl: String = 
         return response.body()
     }
 
-    suspend fun getLibrary(type: MediaType? = null, cursor: String? = null, limit: Int = 100): LibraryListResponse {
+    suspend fun getLibrary(type: MediaType? = null, cursor: String? = null, limit: Int): LibraryListResponse {
         val response = client.get("${baseUrl}library") {
             type?.let { parameter("type", it.value) }
             cursor?.let { parameter("cursor", it) }

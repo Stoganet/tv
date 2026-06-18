@@ -35,6 +35,7 @@ class LibraryViewModel(private val type: MediaType, private val repository: Libr
     fun onIntent(intent: LibraryIntent) {
         when (intent) {
             LibraryIntent.Retry -> {
+                if (_state.value is LibraryUiState.Loading) return
                 nextCursor = null
                 loadLibrary()
             }
@@ -52,7 +53,14 @@ class LibraryViewModel(private val type: MediaType, private val repository: Libr
             _state.update { LibraryUiState.Loading }
         } else {
             _state.update { current ->
-                if (current is LibraryUiState.Content) current.copy(isLoadingMore = true) else current
+                if (current is LibraryUiState.Content) {
+                    current.copy(
+                        isLoadingMore = true,
+                        hasLoadMoreError = false,
+                    )
+                } else {
+                    current
+                }
             }
         }
         viewModelScope.launch {
@@ -67,13 +75,14 @@ class LibraryViewModel(private val type: MediaType, private val repository: Libr
                             items = (existing + newItems).toImmutableList(),
                             hasMore = response.nextCursor != null,
                             isLoadingMore = false,
+                            hasLoadMoreError = false,
                         )
                     }
                 }
                 .onFailure {
                     _state.update { current ->
                         if (current is LibraryUiState.Content) {
-                            current.copy(isLoadingMore = false)
+                            current.copy(isLoadingMore = false, hasLoadMoreError = true)
                         } else {
                             LibraryUiState.Error
                         }

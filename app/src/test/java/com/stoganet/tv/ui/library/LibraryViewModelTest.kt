@@ -106,6 +106,27 @@ class LibraryViewModelTest {
     }
 
     @Test
+    fun `LoadMore clears hasLoadMoreError when retry begins`() = runTest {
+        val page1 = fakeResponse(items = listOf(fakeItem("1")), nextCursor = "cursor1")
+        coEvery { repository.getLibrary(any(), null, any()) } returns Result.success(page1)
+        coEvery { repository.getLibrary(any(), "cursor1", any()) } returns Result.failure(RuntimeException("fail"))
+
+        val vm = LibraryViewModel(MediaType.MOVIE, repository)
+        vm.onIntent(LibraryIntent.LoadMore)
+
+        val errorState = vm.state.value as LibraryUiState.Content
+        assert(errorState.hasLoadMoreError)
+
+        coEvery { repository.getLibrary(any(), "cursor1", any()) } returns Result.success(
+            fakeResponse(items = listOf(fakeItem("2")), nextCursor = null),
+        )
+        vm.onIntent(LibraryIntent.LoadMore)
+
+        val retryingState = vm.state.value as LibraryUiState.Content
+        assertFalse(retryingState.hasLoadMoreError)
+    }
+
+    @Test
     fun `LoadMore no-ops when not in Content state`() = runTest {
         coEvery { repository.getLibrary(any(), any(), any()) } returns Result.failure(RuntimeException("fail"))
         val vm = LibraryViewModel(MediaType.MOVIE, repository)
