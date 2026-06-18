@@ -27,7 +27,7 @@ class PlayerScreenTest {
     @Test
     fun loadingState_showsProgressIndicator() = runComposeUiTest {
         setContent {
-            PlayerScreen(state = PlayerUiState.Loading, player = mockPlayer, onBack = {})
+            PlayerScreen(state = PlayerUiState.Loading, onBack = {}, player = mockPlayer)
         }
 
         onNode(
@@ -38,7 +38,7 @@ class PlayerScreenTest {
     @Test
     fun errorState_showsErrorMessage() = runComposeUiTest {
         setContent {
-            PlayerScreen(state = PlayerUiState.Error, player = mockPlayer, onBack = {})
+            PlayerScreen(state = PlayerUiState.Error, onBack = {}, player = mockPlayer)
         }
 
         val ctx = ApplicationProvider.getApplicationContext<Context>()
@@ -48,7 +48,7 @@ class PlayerScreenTest {
     @Test
     fun errorState_showsBackButton() = runComposeUiTest {
         setContent {
-            PlayerScreen(state = PlayerUiState.Error, player = mockPlayer, onBack = {})
+            PlayerScreen(state = PlayerUiState.Error, onBack = {}, player = mockPlayer)
         }
 
         val ctx = ApplicationProvider.getApplicationContext<Context>()

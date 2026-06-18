@@ -15,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -32,7 +31,7 @@ import com.stoganet.tv.R
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun PlayerScreen(state: PlayerUiState, player: ExoPlayer, onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun PlayerScreen(state: PlayerUiState, onBack: () -> Unit, modifier: Modifier = Modifier, player: ExoPlayer? = null) {
     BackHandler(onBack = onBack)
 
     when (state) {
@@ -87,22 +86,12 @@ fun PlayerScreen(state: PlayerUiState, player: ExoPlayer, onBack: () -> Unit, mo
 @Preview(showBackground = true, widthDp = 1280, heightDp = 720)
 @Composable
 private fun PreviewPlayerLoading() {
-    val ctx = LocalContext.current
-    PlayerScreen(
-        state = PlayerUiState.Loading,
-        player = ExoPlayer.Builder(ctx).build(),
-        onBack = {},
-    )
+    PlayerScreen(state = PlayerUiState.Loading, onBack = {})
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Preview(showBackground = true, widthDp = 1280, heightDp = 720)
 @Composable
 private fun PreviewPlayerError() {
-    val ctx = LocalContext.current
-    PlayerScreen(
-        state = PlayerUiState.Error,
-        player = ExoPlayer.Builder(ctx).build(),
-        onBack = {},
-    )
+    PlayerScreen(state = PlayerUiState.Error, onBack = {})
 }

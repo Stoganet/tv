@@ -105,11 +105,11 @@ fun AppNavHost() {
             val state by vm.state.collectAsStateWithLifecycle()
             PlayerScreen(
                 state = state,
-                player = vm.player,
                 onBack = {
                     vm.player.stop()
                     navController.popBackStack()
                 },
+                player = vm.player,
             )
         }
     }

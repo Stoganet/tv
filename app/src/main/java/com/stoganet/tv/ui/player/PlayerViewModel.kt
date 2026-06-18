@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
@@ -63,9 +64,13 @@ class PlayerViewModel(
         fun factory(id: String): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as StoganetApp
-                val token = runBlocking { app.services.tokenStore.accessToken() }.orEmpty()
-                val dataSourceFactory = DefaultHttpDataSource.Factory()
-                    .setDefaultRequestProperties(mapOf("Authorization" to "Bearer $token"))
+                val tokenStore = app.services.tokenStore
+                val dataSourceFactory = DataSource.Factory {
+                    val token = runBlocking { tokenStore.accessToken() }.orEmpty()
+                    DefaultHttpDataSource.Factory()
+                        .setDefaultRequestProperties(mapOf("Authorization" to "Bearer $token"))
+                        .createDataSource()
+                }
                 val player = ExoPlayer.Builder(app)
                     .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory))
                     .build()
