@@ -47,7 +47,6 @@ compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4
 compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 tv-material = { group = "androidx.tv", name = "tv-material", version.ref = "tv-material" }
 
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }

@@ -4,14 +4,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.Tv
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -107,7 +104,7 @@ private fun NavigationDrawerScope.NavDrawerContent(currentRoute: String?, naviga
         NavigationDrawerItem(
             selected = currentRoute == "home",
             onClick = { navigateTo("home") },
-            leadingContent = { Icon(Icons.Filled.Home, contentDescription = null) },
+            leadingContent = { Icon(painterResource(R.drawable.ic_home), contentDescription = null) },
             modifier = Modifier.semantics {
                 contentDescription = if (currentRoute == "home") homeDesc else homeLabel
             },
@@ -115,7 +112,7 @@ private fun NavigationDrawerScope.NavDrawerContent(currentRoute: String?, naviga
         NavigationDrawerItem(
             selected = currentRoute == "library/movies",
             onClick = { navigateTo("library/movies") },
-            leadingContent = { Icon(Icons.Filled.Movie, contentDescription = null) },
+            leadingContent = { Icon(painterResource(R.drawable.ic_movie), contentDescription = null) },
             modifier = Modifier.semantics {
                 contentDescription = if (currentRoute == "library/movies") moviesDesc else moviesLabel
             },
@@ -123,7 +120,7 @@ private fun NavigationDrawerScope.NavDrawerContent(currentRoute: String?, naviga
         NavigationDrawerItem(
             selected = currentRoute == "library/tv",
             onClick = { navigateTo("library/tv") },
-            leadingContent = { Icon(Icons.Filled.Tv, contentDescription = null) },
+            leadingContent = { Icon(painterResource(R.drawable.ic_tv), contentDescription = null) },
             modifier = Modifier.semantics {
                 contentDescription = if (currentRoute == "library/tv") tvDesc else tvLabel
             },
