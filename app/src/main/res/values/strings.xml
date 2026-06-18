@@ -29,6 +29,7 @@
     <string name="nav_home">Home</string>
     <string name="nav_movies">Movies</string>
     <string name="nav_tv_shows">TV Shows</string>
+    <string name="nav_item_selected_description">%1$s, selected</string>
     <string name="library_error_message">Could not load library. Please try again.</string>
     <string name="library_load_more_error">Couldn\'t load more items.</string>
 </resources>
