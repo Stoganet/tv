@@ -44,7 +44,7 @@ fun AppNavHost() {
     val navigateTo: (String) -> Unit = remember(navController) {
         { route ->
             navController.navigate(route) {
-                popUpTo("home") { saveState = true }
+                popUpTo(AppRoutes.HOME) { saveState = true }
                 launchSingleTop = true
                 restoreState = true
             }
@@ -56,8 +56,8 @@ fun AppNavHost() {
             NavDrawerContent(currentRoute = currentRoute, navigateTo = navigateTo)
         },
     ) {
-        NavHost(navController = navController, startDestination = "home") {
-            composable("home") {
+        NavHost(navController = navController, startDestination = AppRoutes.HOME) {
+            composable(AppRoutes.HOME) {
                 val vm: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
                 val state by vm.state.collectAsStateWithLifecycle()
                 HomeScreen(
@@ -66,14 +66,14 @@ fun AppNavHost() {
                     onNavigateTo = { route -> navController.navigate(route) },
                 )
             }
-            composable("library/movies") {
+            composable(AppRoutes.LIBRARY_MOVIES) {
                 val vm: LibraryViewModel = viewModel(
                     factory = LibraryViewModel.factory(MediaType.MOVIE),
                 )
                 val state by vm.state.collectAsStateWithLifecycle()
                 LibraryScreen(state = state, onIntent = vm::onIntent)
             }
-            composable("library/tv") {
+            composable(AppRoutes.LIBRARY_TV) {
                 val vm: LibraryViewModel = viewModel(
                     factory = LibraryViewModel.factory(MediaType.TV),
                 )
@@ -102,27 +102,27 @@ private fun NavigationDrawerScope.NavDrawerContent(currentRoute: String?, naviga
             .selectableGroup(),
     ) {
         NavigationDrawerItem(
-            selected = currentRoute == "home",
-            onClick = { navigateTo("home") },
+            selected = currentRoute == AppRoutes.HOME,
+            onClick = { navigateTo(AppRoutes.HOME) },
             leadingContent = { Icon(painterResource(R.drawable.ic_home), contentDescription = null) },
             modifier = Modifier.semantics {
-                contentDescription = if (currentRoute == "home") homeDesc else homeLabel
+                contentDescription = if (currentRoute == AppRoutes.HOME) homeDesc else homeLabel
             },
         ) { Text(homeLabel) }
         NavigationDrawerItem(
-            selected = currentRoute == "library/movies",
-            onClick = { navigateTo("library/movies") },
+            selected = currentRoute == AppRoutes.LIBRARY_MOVIES,
+            onClick = { navigateTo(AppRoutes.LIBRARY_MOVIES) },
             leadingContent = { Icon(painterResource(R.drawable.ic_movie), contentDescription = null) },
             modifier = Modifier.semantics {
-                contentDescription = if (currentRoute == "library/movies") moviesDesc else moviesLabel
+                contentDescription = if (currentRoute == AppRoutes.LIBRARY_MOVIES) moviesDesc else moviesLabel
             },
         ) { Text(moviesLabel) }
         NavigationDrawerItem(
-            selected = currentRoute == "library/tv",
-            onClick = { navigateTo("library/tv") },
+            selected = currentRoute == AppRoutes.LIBRARY_TV,
+            onClick = { navigateTo(AppRoutes.LIBRARY_TV) },
             leadingContent = { Icon(painterResource(R.drawable.ic_tv), contentDescription = null) },
             modifier = Modifier.semantics {
-                contentDescription = if (currentRoute == "library/tv") tvDesc else tvLabel
+                contentDescription = if (currentRoute == AppRoutes.LIBRARY_TV) tvDesc else tvLabel
             },
         ) { Text(tvLabel) }
     }
@@ -132,19 +132,19 @@ private fun NavigationDrawerScope.NavDrawerContent(currentRoute: String?, naviga
 @Preview(showBackground = true, widthDp = 300, heightDp = 720)
 @Composable
 private fun PreviewNavDrawerHomeSelected() {
-    NavigationDrawer(drawerContent = { NavDrawerContent(currentRoute = "home", navigateTo = {}) }) {}
+    NavigationDrawer(drawerContent = { NavDrawerContent(currentRoute = AppRoutes.HOME, navigateTo = {}) }) {}
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Preview(showBackground = true, widthDp = 300, heightDp = 720)
 @Composable
 private fun PreviewNavDrawerMoviesSelected() {
-    NavigationDrawer(drawerContent = { NavDrawerContent(currentRoute = "library/movies", navigateTo = {}) }) {}
+    NavigationDrawer(drawerContent = { NavDrawerContent(currentRoute = AppRoutes.LIBRARY_MOVIES, navigateTo = {}) }) {}
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Preview(showBackground = true, widthDp = 300, heightDp = 720)
 @Composable
 private fun PreviewNavDrawerTvSelected() {
-    NavigationDrawer(drawerContent = { NavDrawerContent(currentRoute = "library/tv", navigateTo = {}) }) {}
+    NavigationDrawer(drawerContent = { NavDrawerContent(currentRoute = AppRoutes.LIBRARY_TV, navigateTo = {}) }) {}
 }

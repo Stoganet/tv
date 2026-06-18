@@ -28,6 +28,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.stoganet.tv.R
+import com.stoganet.tv.ui.AppRoutes
 import kotlinx.collections.immutable.persistentListOf
 
 private const val SEE_MORE_ASPECT_RATIO = 2f / 3f
@@ -183,7 +184,7 @@ private fun PreviewContent() {
                     R.string.home_section_all_movies,
                     items,
                     hasMore = false,
-                    seeMoreRoute = "library/movies",
+                    seeMoreRoute = AppRoutes.LIBRARY_MOVIES,
                 ),
                 HomeSectionUiState("all_tv", R.string.home_section_all_tv, items, hasMore = false),
             ),

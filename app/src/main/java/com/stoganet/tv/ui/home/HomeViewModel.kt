@@ -11,6 +11,7 @@ import com.stoganet.tv.StoganetApp
 import com.stoganet.tv.api.model.HomeSection
 import com.stoganet.tv.api.model.LibraryItem
 import com.stoganet.tv.data.home.HomeRepository
+import com.stoganet.tv.ui.AppRoutes
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -71,8 +72,8 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
         }
 
         private fun sectionSeeMoreRoute(id: String) = when (id) {
-            "all_movies" -> "library/movies"
-            "all_tv" -> "library/tv"
+            "all_movies" -> AppRoutes.LIBRARY_MOVIES
+            "all_tv" -> AppRoutes.LIBRARY_TV
             else -> null
         }
 
