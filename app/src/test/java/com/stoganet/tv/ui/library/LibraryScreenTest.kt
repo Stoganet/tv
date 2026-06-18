@@ -94,4 +94,23 @@ class LibraryScreenTest {
 
         onNodeWithContentDescription("Inception (2010)").assertIsDisplayed()
     }
+
+    @Test
+    fun contentState_loadMoreError_showsErrorMessage() = runComposeUiTest {
+        setContent {
+            LibraryScreen(
+                state = LibraryUiState.Content(
+                    items = persistentListOf(
+                        LibraryItemUiState(id = "1", posterUrl = "", contentDescription = "Inception (2010)"),
+                    ),
+                    hasMore = true,
+                    isLoadingMore = false,
+                    hasLoadMoreError = true,
+                ),
+                onIntent = {},
+            )
+        }
+
+        onNodeWithText(str(R.string.library_load_more_error)).assertIsDisplayed()
+    }
 }
