@@ -31,12 +31,7 @@ class DetailRepositoryTest {
         runtime = 136,
         cast = listOf(CastMember(name = "Keanu Reeves", role = "Actor")),
         seasons = 0,
-        play = PlayInfo(
-            jellyfinItemId = "jf-uuid",
-            jellyfinBaseUrl = "https://jf.example.com",
-            jellyfinAccessToken = "tok",
-            jellyfinUserId = "uid",
-        ),
+        play = PlayInfo(streamUrl = "https://api.stoganet.com/stream/jf-uuid"),
     )
 
     @Test

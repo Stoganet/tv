@@ -7,16 +7,19 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.session.MediaSession
 import com.stoganet.tv.StoganetApp
-import com.stoganet.tv.api.model.PlayInfo
 import com.stoganet.tv.data.detail.DetailRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class PlayerViewModel(
     private val id: String,
@@ -41,7 +44,7 @@ class PlayerViewModel(
                         _state.update { PlayerUiState.Error }
                         return@onSuccess
                     }
-                    player.setMediaItem(MediaItem.fromUri(buildStreamUrl(play)))
+                    player.setMediaItem(MediaItem.fromUri(play.streamUrl))
                     player.prepare()
                     _state.update { PlayerUiState.Ready }
                 }
@@ -50,20 +53,22 @@ class PlayerViewModel(
     }
 
     override fun onCleared() {
+        super.onCleared()
         mediaSession.release()
         player.release()
     }
 
     companion object {
-        fun buildStreamUrl(play: PlayInfo): String = "${play.jellyfinBaseUrl}/Videos/${play.jellyfinItemId}/stream" +
-            "?api_key=${play.jellyfinAccessToken}" +
-            "&UserId=${play.jellyfinUserId}" +
-            "&static=true"
-
+        @androidx.annotation.OptIn(UnstableApi::class)
         fun factory(id: String): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as StoganetApp
-                val player = ExoPlayer.Builder(app).build()
+                val token = runBlocking { app.services.tokenStore.accessToken() }.orEmpty()
+                val dataSourceFactory = DefaultHttpDataSource.Factory()
+                    .setDefaultRequestProperties(mapOf("Authorization" to "Bearer $token"))
+                val player = ExoPlayer.Builder(app)
+                    .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory))
+                    .build()
                 val mediaSession = MediaSession.Builder(app, player).build()
                 PlayerViewModel(
                     id = id,

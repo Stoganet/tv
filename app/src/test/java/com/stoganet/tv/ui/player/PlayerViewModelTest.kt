@@ -19,7 +19,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -59,12 +58,7 @@ class PlayerViewModelTest {
         play = play,
     )
 
-    private fun fakePlay() = PlayInfo(
-        jellyfinItemId = "abc123",
-        jellyfinBaseUrl = "https://jf.example.com",
-        jellyfinAccessToken = "mytoken",
-        jellyfinUserId = "user1",
-    )
+    private fun fakePlay() = PlayInfo(streamUrl = "https://api.stoganet.com/stream/abc123")
 
     @Test
     fun `transitions to Ready when play info available`() = runTest {
@@ -90,14 +84,5 @@ class PlayerViewModelTest {
         val vm = PlayerViewModel(id = "id1", repository = repository, player = player, mediaSession = mediaSession)
 
         assertTrue(vm.state.value is PlayerUiState.Error)
-    }
-
-    @Test
-    fun `buildStreamUrl constructs correct URL`() {
-        val url = PlayerViewModel.buildStreamUrl(fakePlay())
-        assertEquals(
-            "https://jf.example.com/Videos/abc123/stream?api_key=mytoken&UserId=user1&static=true",
-            url,
-        )
     }
 }

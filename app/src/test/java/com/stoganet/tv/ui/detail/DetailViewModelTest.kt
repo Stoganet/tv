@@ -9,6 +9,7 @@ import com.stoganet.tv.data.detail.DetailRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -36,28 +37,22 @@ class DetailViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun fakeDetail(
-        play: PlayInfo? = PlayInfo(
-            jellyfinItemId = "jf-uuid",
-            jellyfinBaseUrl = "https://jf.example.com",
-            jellyfinAccessToken = "tok",
-            jellyfinUserId = "uid",
-        ),
-    ) = LibraryDetail(
-        id = "tmdb:movie:603",
-        title = "The Matrix",
-        year = 1999,
-        type = MediaType.MOVIE,
-        poster = "https://img/poster",
-        backdrop = "https://img/backdrop",
-        overview = "A computer hacker learns the truth.",
-        state = if (play != null) MediaState.PLAYABLE else MediaState.DOWNLOADING,
-        genres = listOf("Action", "Sci-Fi"),
-        runtime = 136,
-        cast = listOf(CastMember(name = "Keanu Reeves", role = "Actor")),
-        seasons = 0,
-        play = play,
-    )
+    private fun fakeDetail(play: PlayInfo? = PlayInfo(streamUrl = "https://api.stoganet.com/stream/jf-uuid")) =
+        LibraryDetail(
+            id = "tmdb:movie:603",
+            title = "The Matrix",
+            year = 1999,
+            type = MediaType.MOVIE,
+            poster = "https://img/poster",
+            backdrop = "https://img/backdrop",
+            overview = "A computer hacker learns the truth.",
+            state = if (play != null) MediaState.PLAYABLE else MediaState.DOWNLOADING,
+            genres = listOf("Action", "Sci-Fi"),
+            runtime = 136,
+            cast = listOf(CastMember(name = "Keanu Reeves", role = "Actor")),
+            seasons = 0,
+            play = play,
+        )
 
     @Test
     fun `loads Content on success`() = runTest {
@@ -99,10 +94,13 @@ class DetailViewModelTest {
 
     @Test
     fun `Retry no-ops when already Loading`() = runTest {
-        coEvery { repository.getDetail(any()) } returns Result.success(fakeDetail())
+        val deferred = CompletableDeferred<Result<LibraryDetail>>()
+        coEvery { repository.getDetail(any()) } coAnswers { deferred.await() }
         val vm = DetailViewModel(id = "id1", repository = repository)
+        assertTrue(vm.state.value is DetailUiState.Loading)
         vm.onIntent(DetailIntent.Retry)
-        coVerify(atLeast = 1) { repository.getDetail("id1") }
+        deferred.complete(Result.success(fakeDetail()))
+        coVerify(exactly = 1) { repository.getDetail("id1") }
     }
 
     @Test
