@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -39,10 +40,10 @@ private const val GRID_COLUMNS = 6
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun LibraryScreen(state: LibraryUiState, onIntent: (LibraryIntent) -> Unit) {
+fun LibraryScreen(state: LibraryUiState, onIntent: (LibraryIntent) -> Unit, modifier: Modifier = Modifier) {
     when (state) {
         LibraryUiState.Loading -> Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
             CircularProgressIndicator()
@@ -50,7 +51,7 @@ fun LibraryScreen(state: LibraryUiState, onIntent: (LibraryIntent) -> Unit) {
 
         LibraryUiState.Error -> {
             val retryLabel = stringResource(R.string.action_retry)
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
@@ -70,12 +71,17 @@ fun LibraryScreen(state: LibraryUiState, onIntent: (LibraryIntent) -> Unit) {
             }
         }
 
-        is LibraryUiState.Content -> LibraryGrid(state = state, onIntent = onIntent)
+        is LibraryUiState.Content -> LibraryGrid(state = state, onIntent = onIntent, modifier = modifier)
     }
 }
 
 @Composable
-private fun LibraryGrid(state: LibraryUiState.Content, onIntent: (LibraryIntent) -> Unit) {
+private fun LibraryGrid(
+    state: LibraryUiState.Content,
+    onIntent: (LibraryIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val currentOnIntent by rememberUpdatedState(onIntent)
     val gridState = rememberLazyGridState()
     val shouldLoadMore by remember(state.items.size) {
         derivedStateOf {
@@ -85,7 +91,7 @@ private fun LibraryGrid(state: LibraryUiState.Content, onIntent: (LibraryIntent)
         }
     }
     LaunchedEffect(shouldLoadMore) {
-        if (shouldLoadMore) onIntent(LibraryIntent.LoadMore)
+        if (shouldLoadMore) currentOnIntent(LibraryIntent.LoadMore)
     }
     LazyVerticalGrid(
         columns = GridCells.Fixed(GRID_COLUMNS),
@@ -93,7 +99,7 @@ private fun LibraryGrid(state: LibraryUiState.Content, onIntent: (LibraryIntent)
         contentPadding = PaddingValues(horizontal = 48.dp, vertical = 32.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
     ) {
         items(state.items, key = { it.id }) { item ->
             PosterCard(

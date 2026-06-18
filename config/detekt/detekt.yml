@@ -38,6 +38,10 @@ style:
     active: true
     includeLineWrapping: true
 
+Compose:
+  ModifierMissing:
+    active: true
+
 ktlint:
   active: true
   android: true

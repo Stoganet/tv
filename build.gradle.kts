@@ -20,4 +20,5 @@ tasks.named("detekt") {
 
 dependencies {
     detektPlugins(libs.detekt.ktlint.wrapper)
+    detektPlugins(libs.detekt.compose.rules)
 }

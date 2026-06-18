@@ -34,15 +34,20 @@ private const val SEE_MORE_ASPECT_RATIO = 2f / 3f
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun HomeScreen(state: HomeUiState, onIntent: (HomeIntent) -> Unit, onNavigateTo: (route: String) -> Unit) {
+fun HomeScreen(
+    state: HomeUiState,
+    onIntent: (HomeIntent) -> Unit,
+    onNavigateTo: (route: String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     when (state) {
-        HomeUiState.Loading -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        HomeUiState.Loading -> Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
 
         HomeUiState.Error -> {
             val retryLabel = stringResource(R.string.action_retry)
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
@@ -64,7 +69,7 @@ fun HomeScreen(state: HomeUiState, onIntent: (HomeIntent) -> Unit, onNavigateTo:
 
         is HomeUiState.Content -> {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = modifier.fillMaxSize(),
                 contentPadding = PaddingValues(vertical = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {

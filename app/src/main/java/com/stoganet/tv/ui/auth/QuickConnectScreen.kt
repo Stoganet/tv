@@ -23,8 +23,12 @@ import com.stoganet.tv.R
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun QuickConnectScreen(state: QuickConnectUiState, onIntent: (QuickConnectIntent) -> Unit) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+fun QuickConnectScreen(
+    state: QuickConnectUiState,
+    onIntent: (QuickConnectIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when (state.status) {
             QuickConnectUiState.Status.Loading -> CircularProgressIndicator()
 

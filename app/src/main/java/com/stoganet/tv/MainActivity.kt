@@ -29,10 +29,10 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun App(tokenStore: TokenStore) {
+fun App(tokenStore: TokenStore, modifier: Modifier = Modifier) {
     val isAuthenticated by tokenStore.isAuthenticated.collectAsStateWithLifecycle(false)
     StoganetTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
+        Surface(modifier = modifier.fillMaxSize()) {
             if (isAuthenticated) AppNavHost() else AuthNavHost()
         }
     }
