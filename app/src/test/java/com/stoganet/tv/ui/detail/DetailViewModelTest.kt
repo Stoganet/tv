@@ -52,7 +52,7 @@ class DetailViewModelTest {
             genres = listOf("Action", "Sci-Fi"),
             runtime = 136,
             cast = listOf(CastMember(name = "Keanu Reeves", role = "Actor")),
-            seasons = 0,
+            seasons = emptyList(),
             play = play,
         )
 

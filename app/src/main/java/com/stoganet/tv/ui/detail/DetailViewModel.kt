@@ -7,9 +7,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stoganet.tv.StoganetApp
+import com.stoganet.tv.api.model.Episode
 import com.stoganet.tv.api.model.LibraryDetail
 import com.stoganet.tv.api.model.MediaState
+import com.stoganet.tv.api.model.ResumeInfo
+import com.stoganet.tv.api.model.Season
 import com.stoganet.tv.data.detail.DetailRepository
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +36,8 @@ class DetailViewModel(private val id: String, private val repository: DetailRepo
                 if (_state.value is DetailUiState.Loading) return
                 loadDetail()
             }
+
+            is DetailIntent.SelectSeason -> selectSeason(intent.seasonNumber)
         }
     }
 
@@ -44,6 +50,27 @@ class DetailViewModel(private val id: String, private val repository: DetailRepo
         }
     }
 
+    private fun selectSeason(seasonNumber: Int) {
+        val current = _state.value as? DetailUiState.Content ?: return
+        if (current.selectedSeason == seasonNumber) return
+        _state.update {
+            (it as DetailUiState.Content).copy(
+                selectedSeason = seasonNumber,
+                episodes = persistentListOf(),
+            )
+        }
+        viewModelScope.launch {
+            repository.getEpisodes(id, seasonNumber)
+                .onSuccess { episodes ->
+                    _state.update { state ->
+                        val s = state as? DetailUiState.Content ?: return@update state
+                        if (s.selectedSeason != seasonNumber) return@update state
+                        s.copy(episodes = episodes.map { it.toUiState() }.toImmutableList())
+                    }
+                }
+        }
+    }
+
     private fun LibraryDetail.toUiState() = DetailUiState.Content(
         title = title,
         year = year,
@@ -53,9 +80,10 @@ class DetailViewModel(private val id: String, private val repository: DetailRepo
         genres = genres.toImmutableList(),
         runtime = formatRuntime(runtime),
         cast = cast.map { CastMemberUiState(it.name, it.role) }.toImmutableList(),
-        seasons = seasons,
-        isPlayable = state == MediaState.PLAYABLE && play != null,
+        seasons = seasons.map { it.toUiState() }.toImmutableList(),
+        resume = resume?.toUiState(),
         streamUrl = play?.streamUrl,
+        isPlayable = state == MediaState.PLAYABLE && play != null,
     )
 
     companion object {
@@ -78,3 +106,32 @@ class DetailViewModel(private val id: String, private val repository: DetailRepo
         }
     }
 }
+
+private fun Season.toUiState() = SeasonUiState(
+    number = number,
+    name = name,
+    episodeCount = episodeCount,
+    posterUrl = poster,
+    overview = overview,
+)
+
+private fun Episode.toUiState() = EpisodeUiState(
+    id = id,
+    number = number,
+    title = title,
+    overview = overview,
+    runtimeMinutes = runtime,
+    thumbnailUrl = thumbnail,
+    streamUrl = play?.streamUrl,
+    positionMs = progress?.positionMs ?: 0L,
+    played = progress?.played ?: false,
+)
+
+private fun ResumeInfo.toUiState() = ResumeUiState(
+    seasonNumber = seasonNumber,
+    episodeNumber = episodeNumber,
+    episodeId = episodeId,
+    title = title,
+    streamUrl = play.streamUrl,
+    positionMs = progress.positionMs,
+)
