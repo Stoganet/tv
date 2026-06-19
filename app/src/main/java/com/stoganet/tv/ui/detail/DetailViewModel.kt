@@ -53,6 +53,7 @@ class DetailViewModel(private val id: String, private val repository: DetailRepo
     private fun selectSeason(seasonNumber: Int) {
         val current = _state.value as? DetailUiState.Content ?: return
         if (current.selectedSeason == seasonNumber) return
+        val previousSeason = current.selectedSeason
         _state.update {
             (it as DetailUiState.Content).copy(
                 selectedSeason = seasonNumber,
@@ -66,6 +67,13 @@ class DetailViewModel(private val id: String, private val repository: DetailRepo
                         val s = state as? DetailUiState.Content ?: return@update state
                         if (s.selectedSeason != seasonNumber) return@update state
                         s.copy(episodes = episodes.map { it.toUiState() }.toImmutableList())
+                    }
+                }
+                .onFailure {
+                    _state.update { state ->
+                        val s = state as? DetailUiState.Content ?: return@update state
+                        if (s.selectedSeason != seasonNumber) return@update state
+                        s.copy(selectedSeason = previousSeason, episodes = persistentListOf())
                     }
                 }
         }

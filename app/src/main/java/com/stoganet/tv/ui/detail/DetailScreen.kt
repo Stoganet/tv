@@ -213,6 +213,12 @@ private fun DetailMetadataPanel(
             }
         }
 
+        if (state.mediaType == MediaType.TV && state.episodes.isNotEmpty()) {
+            items(state.episodes) { episode ->
+                EpisodeRow(episode = episode, onNavigateToPlayer = onNavigateToPlayer)
+            }
+        }
+
         if (state.cast.isNotEmpty()) {
             item {
                 CastSection(cast = state.cast)
@@ -229,6 +235,7 @@ private fun TvActions(
     onIntent: (DetailIntent) -> Unit,
     onNavigateToPlayer: (streamUrl: String, positionMs: Long) -> Unit,
 ) {
+    val chipFocusRequester = remember { FocusRequester() }
     Column {
         if (state.resume != null) {
             val resumeDesc = stringResource(R.string.detail_resume_content_description, state.resume.title)
@@ -251,17 +258,10 @@ private fun TvActions(
             SeasonChips(
                 seasons = state.seasons,
                 selectedSeason = state.selectedSeason,
-                focusRequester = if (state.resume == null) focusRequester else remember { FocusRequester() },
+                focusRequester = if (state.resume == null) focusRequester else chipFocusRequester,
                 onSelectSeason = { onIntent(DetailIntent.SelectSeason(it)) },
             )
             Spacer(Modifier.height(16.dp))
-        }
-
-        if (state.episodes.isNotEmpty()) {
-            EpisodeList(
-                episodes = state.episodes,
-                onNavigateToPlayer = onNavigateToPlayer,
-            )
         }
     }
 }
@@ -288,19 +288,6 @@ private fun SeasonChips(
                     .then(if (isFirst) Modifier.focusRequester(focusRequester) else Modifier)
                     .semantics { contentDescription = desc },
             ) { Text(season.name) }
-        }
-    }
-}
-
-@OptIn(ExperimentalTvMaterial3Api::class)
-@Composable
-private fun EpisodeList(
-    episodes: ImmutableList<EpisodeUiState>,
-    onNavigateToPlayer: (streamUrl: String, positionMs: Long) -> Unit,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        episodes.forEach { episode ->
-            EpisodeRow(episode = episode, onNavigateToPlayer = onNavigateToPlayer)
         }
     }
 }

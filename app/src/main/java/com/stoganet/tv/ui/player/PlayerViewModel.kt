@@ -48,8 +48,7 @@ class PlayerViewModel(
     private fun loadAndPrepare() {
         val url = streamUrl
         if (url != null) {
-            player.setMediaItem(MediaItem.fromUri(url))
-            if (positionMs > 0L) player.seekTo(positionMs)
+            player.setMediaItem(MediaItem.fromUri(url), positionMs)
             player.prepare()
             _state.update { PlayerUiState.Ready }
             return
@@ -62,7 +61,7 @@ class PlayerViewModel(
                         _state.update { PlayerUiState.Error }
                         return@onSuccess
                     }
-                    player.setMediaItem(MediaItem.fromUri(play.streamUrl))
+                    player.setMediaItem(MediaItem.fromUri(play.streamUrl), positionMs)
                     player.prepare()
                     _state.update { PlayerUiState.Ready }
                 }
