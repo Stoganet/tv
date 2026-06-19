@@ -24,5 +24,6 @@ sealed interface DetailUiState {
         val cast: ImmutableList<CastMemberUiState>,
         val seasons: Int,
         val isPlayable: Boolean,
+        val streamUrl: String? = null,
     ) : DetailUiState
 }

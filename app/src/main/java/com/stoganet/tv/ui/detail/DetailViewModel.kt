@@ -55,6 +55,7 @@ class DetailViewModel(private val id: String, private val repository: DetailRepo
         cast = cast.map { CastMemberUiState(it.name, it.role) }.toImmutableList(),
         seasons = seasons,
         isPlayable = state == MediaState.PLAYABLE && play != null,
+        streamUrl = play?.streamUrl,
     )
 
     companion object {

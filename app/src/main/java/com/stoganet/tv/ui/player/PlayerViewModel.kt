@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultHttpDataSource
@@ -27,16 +29,29 @@ class PlayerViewModel(
     private val repository: DetailRepository,
     val player: ExoPlayer,
     private val mediaSession: MediaSession,
+    private val streamUrl: String? = null,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<PlayerUiState>(PlayerUiState.Loading)
     val state: StateFlow<PlayerUiState> = _state.asStateFlow()
 
     init {
+        player.addListener(object : Player.Listener {
+            override fun onPlayerError(error: PlaybackException) {
+                _state.update { PlayerUiState.Error }
+            }
+        })
         loadAndPrepare()
     }
 
     private fun loadAndPrepare() {
+        val url = streamUrl
+        if (url != null) {
+            player.setMediaItem(MediaItem.fromUri(url))
+            player.prepare()
+            _state.update { PlayerUiState.Ready }
+            return
+        }
         viewModelScope.launch {
             repository.getDetail(id)
                 .onSuccess { detail ->
@@ -61,7 +76,7 @@ class PlayerViewModel(
 
     companion object {
         @androidx.annotation.OptIn(UnstableApi::class)
-        fun factory(id: String): ViewModelProvider.Factory = viewModelFactory {
+        fun factory(id: String, streamUrl: String? = null): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as StoganetApp
                 val tokenStore = app.services.tokenStore
@@ -80,6 +95,7 @@ class PlayerViewModel(
                     repository = app.services.detailRepository,
                     player = player,
                     mediaSession = mediaSession,
+                    streamUrl = streamUrl,
                 )
             }
         }

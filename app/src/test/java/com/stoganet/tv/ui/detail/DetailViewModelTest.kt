@@ -20,6 +20,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -70,6 +71,7 @@ class DetailViewModelTest {
         assertEquals(1, state.cast.size)
         assertEquals("Keanu Reeves", state.cast[0].name)
         assertTrue(state.isPlayable)
+        assertEquals("https://api.stoganet.com/stream/jf-uuid", state.streamUrl)
     }
 
     @Test
@@ -110,6 +112,7 @@ class DetailViewModelTest {
 
         val state = vm.state.value as DetailUiState.Content
         assertFalse(state.isPlayable)
+        assertNull(state.streamUrl)
     }
 
     @Test

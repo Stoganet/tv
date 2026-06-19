@@ -16,10 +16,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.NavigationDrawer
@@ -96,12 +98,23 @@ fun AppNavHost() {
             DetailScreen(
                 state = state,
                 onIntent = vm::onIntent,
-                onNavigateToPlayer = { navController.navigate(AppRoutes.player(id)) },
+                onNavigateToPlayer = { streamUrl -> navController.navigate(AppRoutes.player(id, streamUrl)) },
             )
         }
-        composable(AppRoutes.PLAYER) { backStackEntry ->
+        composable(
+            route = AppRoutes.PLAYER,
+            arguments = listOf(
+                navArgument("id") { type = NavType.StringType },
+                navArgument("streamUrl") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ),
+        ) { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id") ?: return@composable
-            val vm: PlayerViewModel = viewModel(factory = PlayerViewModel.factory(id))
+            val streamUrl = backStackEntry.arguments?.getString("streamUrl")
+            val vm: PlayerViewModel = viewModel(factory = PlayerViewModel.factory(id, streamUrl))
             val state by vm.state.collectAsStateWithLifecycle()
             PlayerScreen(
                 state = state,

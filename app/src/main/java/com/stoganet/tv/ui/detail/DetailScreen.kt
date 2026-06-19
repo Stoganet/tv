@@ -50,7 +50,7 @@ private const val PANEL_WIDTH_FRACTION = 0.52f
 fun DetailScreen(
     state: DetailUiState,
     onIntent: (DetailIntent) -> Unit,
-    onNavigateToPlayer: () -> Unit,
+    onNavigateToPlayer: (String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (state) {
@@ -91,7 +91,7 @@ fun DetailScreen(
 @Composable
 private fun DetailContent(
     state: DetailUiState.Content,
-    onNavigateToPlayer: () -> Unit,
+    onNavigateToPlayer: (String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -144,7 +144,7 @@ private fun DetailBackdrop(backdropUrl: String?) {
 private fun DetailMetadataPanel(
     state: DetailUiState.Content,
     focusRequester: FocusRequester,
-    onNavigateToPlayer: () -> Unit,
+    onNavigateToPlayer: (String?) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -192,7 +192,7 @@ private fun DetailMetadataPanel(
             title = state.title,
             isPlayable = state.isPlayable,
             focusRequester = focusRequester,
-            onNavigateToPlayer = onNavigateToPlayer,
+            onNavigateToPlayer = { onNavigateToPlayer(state.streamUrl) },
         )
 
         if (state.cast.isNotEmpty()) {
@@ -242,7 +242,7 @@ private fun CastSection(cast: ImmutableList<CastMemberUiState>) {
             contentPadding = PaddingValues(end = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            items(cast, key = { "${it.name}:${it.role}" }) { member ->
+            items(cast) { member ->
                 Column {
                     Text(
                         text = member.name,
