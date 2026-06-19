@@ -33,9 +33,6 @@ class DetailScreenTest {
     private fun str(@StringRes id: Int, vararg args: Any): String =
         ApplicationProvider.getApplicationContext<Context>().getString(id, *args)
 
-    private fun strPlural(@StringRes id: Int, count: Int): String =
-        ApplicationProvider.getApplicationContext<Context>().resources.getQuantityString(id, count, count)
-
     private fun fakeMovieContent(isPlayable: Boolean = true) = DetailUiState.Content(
         title = "The Matrix",
         year = 1999,
@@ -45,7 +42,9 @@ class DetailScreenTest {
         genres = persistentListOf("Action", "Sci-Fi"),
         runtime = "2h 16m",
         cast = persistentListOf(CastMemberUiState("Keanu Reeves", "Actor")),
-        seasons = 0,
+        seasons = persistentListOf(),
+        resume = null,
+        streamUrl = if (isPlayable) "https://api.stoganet.com/stream/abc" else null,
         isPlayable = isPlayable,
     )
 
@@ -58,13 +57,19 @@ class DetailScreenTest {
         genres = persistentListOf("Drama", "Crime"),
         runtime = "",
         cast = persistentListOf(CastMemberUiState("Bryan Cranston", "Actor")),
-        seasons = 3,
+        seasons = persistentListOf(
+            SeasonUiState(1, "Season 1", 13, null, null),
+            SeasonUiState(2, "Season 2", 13, null, null),
+            SeasonUiState(3, "Season 3", 10, null, null),
+        ),
+        resume = null,
+        streamUrl = null,
         isPlayable = false,
     )
 
     @Test
     fun loadingState_showsProgressIndicator() = runComposeUiTest {
-        setContent { DetailScreen(state = DetailUiState.Loading, onIntent = {}, onNavigateToPlayer = {}) }
+        setContent { DetailScreen(state = DetailUiState.Loading, onIntent = {}, onNavigateToPlayer = { _, _ -> }) }
 
         onNode(
             SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo, ProgressBarRangeInfo.Indeterminate),
@@ -73,7 +78,7 @@ class DetailScreenTest {
 
     @Test
     fun errorState_showsRetryButton() = runComposeUiTest {
-        setContent { DetailScreen(state = DetailUiState.Error, onIntent = {}, onNavigateToPlayer = {}) }
+        setContent { DetailScreen(state = DetailUiState.Error, onIntent = {}, onNavigateToPlayer = { _, _ -> }) }
 
         onNodeWithContentDescription(str(R.string.action_retry)).assertIsDisplayed()
     }
@@ -85,7 +90,7 @@ class DetailScreenTest {
             DetailScreen(
                 state = DetailUiState.Error,
                 onIntent = { if (it == DetailIntent.Retry) intentFired = true },
-                onNavigateToPlayer = {},
+                onNavigateToPlayer = { _, _ -> },
             )
         }
 
@@ -98,14 +103,20 @@ class DetailScreenTest {
 
     @Test
     fun contentState_movie_showsTitle() = runComposeUiTest {
-        setContent { DetailScreen(state = fakeMovieContent(), onIntent = {}, onNavigateToPlayer = {}) }
+        setContent { DetailScreen(state = fakeMovieContent(), onIntent = {}, onNavigateToPlayer = { _, _ -> }) }
 
         onNodeWithText("The Matrix").assertIsDisplayed()
     }
 
     @Test
     fun contentState_movie_showsPlayButton() = runComposeUiTest {
-        setContent { DetailScreen(state = fakeMovieContent(isPlayable = true), onIntent = {}, onNavigateToPlayer = {}) }
+        setContent {
+            DetailScreen(
+                state = fakeMovieContent(isPlayable = true),
+                onIntent = {},
+                onNavigateToPlayer = { _, _ -> },
+            )
+        }
 
         onNodeWithContentDescription(str(R.string.detail_play_content_description, "The Matrix")).assertIsDisplayed()
     }
@@ -117,7 +128,7 @@ class DetailScreenTest {
             DetailScreen(
                 state = fakeMovieContent(isPlayable = true),
                 onIntent = {},
-                onNavigateToPlayer = { played = true },
+                onNavigateToPlayer = { _, _ -> played = true },
             )
         }
 
@@ -130,15 +141,16 @@ class DetailScreenTest {
     }
 
     @Test
-    fun contentState_tv_showsSeasonsLabel() = runComposeUiTest {
-        setContent { DetailScreen(state = fakeTvContent(), onIntent = {}, onNavigateToPlayer = {}) }
+    fun contentState_tv_showsSeasonChips() = runComposeUiTest {
+        setContent { DetailScreen(state = fakeTvContent(), onIntent = {}, onNavigateToPlayer = { _, _ -> }) }
 
-        onNodeWithText(strPlural(R.plurals.detail_seasons_label, 3), substring = true).assertIsDisplayed()
+        onNodeWithContentDescription(str(R.string.detail_season_chip_content_description, 1)).assertIsDisplayed()
+        onNodeWithContentDescription(str(R.string.detail_season_chip_content_description, 2)).assertIsDisplayed()
     }
 
     @Test
     fun contentState_showsCastMemberName() = runComposeUiTest {
-        setContent { DetailScreen(state = fakeMovieContent(), onIntent = {}, onNavigateToPlayer = {}) }
+        setContent { DetailScreen(state = fakeMovieContent(), onIntent = {}, onNavigateToPlayer = { _, _ -> }) }
 
         onNodeWithText("Keanu Reeves").assertIsDisplayed()
     }
@@ -149,7 +161,7 @@ class DetailScreenTest {
             DetailScreen(
                 state = fakeMovieContent(isPlayable = false),
                 onIntent = {},
-                onNavigateToPlayer = {},
+                onNavigateToPlayer = { _, _ -> },
             )
         }
 
@@ -166,7 +178,7 @@ class DetailScreenTest {
             DetailScreen(
                 state = fakeMovieContent(isPlayable = true).copy(streamUrl = expectedUrl),
                 onIntent = {},
-                onNavigateToPlayer = { url -> receivedUrl = url },
+                onNavigateToPlayer = { url, _ -> receivedUrl = url },
             )
         }
 
