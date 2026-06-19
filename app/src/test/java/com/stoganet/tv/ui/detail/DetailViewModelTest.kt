@@ -1,10 +1,12 @@
 package com.stoganet.tv.ui.detail
 
 import com.stoganet.tv.api.model.CastMember
+import com.stoganet.tv.api.model.Episode
 import com.stoganet.tv.api.model.LibraryDetail
 import com.stoganet.tv.api.model.MediaState
 import com.stoganet.tv.api.model.MediaType
 import com.stoganet.tv.api.model.PlayInfo
+import com.stoganet.tv.api.model.Season
 import com.stoganet.tv.data.detail.DetailRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -145,5 +147,37 @@ class DetailViewModelTest {
     @Test
     fun `formatRuntime returns empty string for zero`() {
         assertEquals("", DetailViewModel.formatRuntime(0))
+    }
+
+    @Test
+    fun `selectSeason loads episodes on success`() = runTest {
+        val season = Season(number = 1, name = "Season 1", episodeCount = 1, poster = "")
+        val detail = fakeDetail().copy(type = MediaType.TV, seasons = listOf(season))
+        coEvery { repository.getDetail(any()) } returns Result.success(detail)
+        val episode = Episode(id = "ep1", number = 1, seasonNumber = 1, title = "Pilot", state = MediaState.PLAYABLE)
+        coEvery { repository.getEpisodes(any(), 1) } returns Result.success(listOf(episode))
+
+        val vm = DetailViewModel(id = "id1", repository = repository)
+        vm.onIntent(DetailIntent.SelectSeason(1))
+
+        val state = vm.state.value as DetailUiState.Content
+        assertEquals(1, state.selectedSeason)
+        assertEquals(1, state.episodes.size)
+        assertEquals("Pilot", state.episodes[0].title)
+    }
+
+    @Test
+    fun `selectSeason reverts selectedSeason on fetch failure`() = runTest {
+        val season = Season(number = 1, name = "Season 1", episodeCount = 1, poster = "")
+        val detail = fakeDetail().copy(type = MediaType.TV, seasons = listOf(season))
+        coEvery { repository.getDetail(any()) } returns Result.success(detail)
+        coEvery { repository.getEpisodes(any(), 1) } returns Result.failure(RuntimeException("network error"))
+
+        val vm = DetailViewModel(id = "id1", repository = repository)
+        vm.onIntent(DetailIntent.SelectSeason(1))
+
+        val state = vm.state.value as DetailUiState.Content
+        assertNull(state.selectedSeason)
+        assertTrue(state.episodes.isEmpty())
     }
 }

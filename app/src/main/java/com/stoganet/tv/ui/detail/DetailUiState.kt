@@ -58,8 +58,8 @@ sealed interface DetailUiState {
         val seasons: ImmutableList<SeasonUiState>,
         val resume: ResumeUiState?,
         val streamUrl: String?,
+        val isPlayable: Boolean,
         val episodes: ImmutableList<EpisodeUiState> = persistentListOf(),
         val selectedSeason: Int? = null,
-        val isPlayable: Boolean,
     ) : DetailUiState
 }
