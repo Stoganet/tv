@@ -1,6 +1,7 @@
 package com.stoganet.tv.data.net
 
 import com.stoganet.tv.api.model.HomeResponse
+import com.stoganet.tv.api.model.LibraryDetail
 import com.stoganet.tv.api.model.LibraryListResponse
 import com.stoganet.tv.api.model.LoginRequest
 import com.stoganet.tv.api.model.MediaType
@@ -78,6 +79,12 @@ class StoganetApi(private val client: HttpClient, private val baseUrl: String = 
             parameter("limit", limit)
         }
         check(response.status.isSuccess()) { "getLibrary failed: ${response.status.value}" }
+        return response.body()
+    }
+
+    suspend fun getDetail(id: String): LibraryDetail {
+        val response = client.get("${baseUrl}library/$id")
+        check(response.status.isSuccess()) { "getDetail failed: ${response.status.value}" }
         return response.body()
     }
 }

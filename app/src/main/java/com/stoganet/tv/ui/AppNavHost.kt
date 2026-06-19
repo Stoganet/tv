@@ -16,10 +16,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.NavigationDrawer
@@ -28,10 +30,14 @@ import androidx.tv.material3.NavigationDrawerScope
 import androidx.tv.material3.Text
 import com.stoganet.tv.R
 import com.stoganet.tv.api.model.MediaType
+import com.stoganet.tv.ui.detail.DetailScreen
+import com.stoganet.tv.ui.detail.DetailViewModel
 import com.stoganet.tv.ui.home.HomeScreen
 import com.stoganet.tv.ui.home.HomeViewModel
 import com.stoganet.tv.ui.library.LibraryScreen
 import com.stoganet.tv.ui.library.LibraryViewModel
+import com.stoganet.tv.ui.player.PlayerScreen
+import com.stoganet.tv.ui.player.PlayerViewModel
 
 @Suppress("LongMethod")
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -51,13 +57,9 @@ fun AppNavHost() {
         }
     }
 
-    NavigationDrawer(
-        drawerContent = {
-            NavDrawerContent(currentRoute = currentRoute, navigateTo = navigateTo)
-        },
-    ) {
-        NavHost(navController = navController, startDestination = AppRoutes.HOME) {
-            composable(AppRoutes.HOME) {
+    NavHost(navController = navController, startDestination = AppRoutes.HOME) {
+        composable(AppRoutes.HOME) {
+            DrawerScaffold(currentRoute = currentRoute, navigateTo = navigateTo) {
                 val vm: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
                 val state by vm.state.collectAsStateWithLifecycle()
                 HomeScreen(
@@ -66,21 +68,73 @@ fun AppNavHost() {
                     onNavigateTo = { route -> navController.navigate(route) },
                 )
             }
-            composable(AppRoutes.LIBRARY_MOVIES) {
-                val vm: LibraryViewModel = viewModel(
-                    factory = LibraryViewModel.factory(MediaType.MOVIE),
-                )
+        }
+        composable(AppRoutes.LIBRARY_MOVIES) {
+            DrawerScaffold(currentRoute = currentRoute, navigateTo = navigateTo) {
+                val vm: LibraryViewModel = viewModel(factory = LibraryViewModel.factory(MediaType.MOVIE))
                 val state by vm.state.collectAsStateWithLifecycle()
-                LibraryScreen(state = state, onIntent = vm::onIntent)
-            }
-            composable(AppRoutes.LIBRARY_TV) {
-                val vm: LibraryViewModel = viewModel(
-                    factory = LibraryViewModel.factory(MediaType.TV),
+                LibraryScreen(
+                    state = state,
+                    onIntent = vm::onIntent,
+                    onNavigateTo = { route -> navController.navigate(route) },
                 )
-                val state by vm.state.collectAsStateWithLifecycle()
-                LibraryScreen(state = state, onIntent = vm::onIntent)
             }
         }
+        composable(AppRoutes.LIBRARY_TV) {
+            DrawerScaffold(currentRoute = currentRoute, navigateTo = navigateTo) {
+                val vm: LibraryViewModel = viewModel(factory = LibraryViewModel.factory(MediaType.TV))
+                val state by vm.state.collectAsStateWithLifecycle()
+                LibraryScreen(
+                    state = state,
+                    onIntent = vm::onIntent,
+                    onNavigateTo = { route -> navController.navigate(route) },
+                )
+            }
+        }
+        composable(AppRoutes.DETAIL) { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: return@composable
+            val vm: DetailViewModel = viewModel(factory = DetailViewModel.factory(id))
+            val state by vm.state.collectAsStateWithLifecycle()
+            DetailScreen(
+                state = state,
+                onIntent = vm::onIntent,
+                onNavigateToPlayer = { streamUrl -> navController.navigate(AppRoutes.player(id, streamUrl)) },
+            )
+        }
+        composable(
+            route = AppRoutes.PLAYER,
+            arguments = listOf(
+                navArgument("id") { type = NavType.StringType },
+                navArgument("streamUrl") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ),
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: return@composable
+            val streamUrl = backStackEntry.arguments?.getString("streamUrl")
+            val vm: PlayerViewModel = viewModel(factory = PlayerViewModel.factory(id, streamUrl))
+            val state by vm.state.collectAsStateWithLifecycle()
+            PlayerScreen(
+                state = state,
+                onBack = {
+                    vm.player.stop()
+                    navController.popBackStack()
+                },
+                player = vm.player,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun DrawerScaffold(currentRoute: String?, navigateTo: (String) -> Unit, content: @Composable () -> Unit) {
+    NavigationDrawer(
+        drawerContent = { NavDrawerContent(currentRoute = currentRoute, navigateTo = navigateTo) },
+    ) {
+        content()
     }
 }
 
@@ -139,12 +193,16 @@ private fun PreviewNavDrawerHomeSelected() {
 @Preview(showBackground = true, widthDp = 300, heightDp = 720)
 @Composable
 private fun PreviewNavDrawerMoviesSelected() {
-    NavigationDrawer(drawerContent = { NavDrawerContent(currentRoute = AppRoutes.LIBRARY_MOVIES, navigateTo = {}) }) {}
+    NavigationDrawer(
+        drawerContent = { NavDrawerContent(currentRoute = AppRoutes.LIBRARY_MOVIES, navigateTo = {}) },
+    ) {}
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Preview(showBackground = true, widthDp = 300, heightDp = 720)
 @Composable
 private fun PreviewNavDrawerTvSelected() {
-    NavigationDrawer(drawerContent = { NavDrawerContent(currentRoute = AppRoutes.LIBRARY_TV, navigateTo = {}) }) {}
+    NavigationDrawer(
+        drawerContent = { NavDrawerContent(currentRoute = AppRoutes.LIBRARY_TV, navigateTo = {}) },
+    ) {}
 }

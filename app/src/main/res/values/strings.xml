@@ -32,4 +32,16 @@
     <string name="nav_item_selected_description">%1$s, selected</string>
     <string name="library_error_message">Could not load library. Please try again.</string>
     <string name="library_load_more_error">Couldn\'t load more items.</string>
+    <string name="detail_error_message">Couldn\'t load details. Please try again.</string>
+    <string name="detail_play_button">Play</string>
+    <string name="detail_not_available_button">Not available</string>
+    <string name="detail_cast_label">Cast</string>
+    <string name="detail_play_content_description">Play %1$s</string>
+    <string name="detail_not_available_content_description">%1$s is not available for playback</string>
+    <string name="player_error_message">Couldn\'t start playback.</string>
+    <string name="player_back_content_description">Back</string>
+    <plurals name="detail_seasons_label">
+        <item quantity="one">%d Season</item>
+        <item quantity="other">%d Seasons</item>
+    </plurals>
 </resources>

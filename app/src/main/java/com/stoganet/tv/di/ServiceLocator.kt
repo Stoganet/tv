@@ -3,6 +3,7 @@ package com.stoganet.tv.di
 import android.content.Context
 import com.stoganet.tv.data.auth.AuthRepository
 import com.stoganet.tv.data.auth.TokenStore
+import com.stoganet.tv.data.detail.DetailRepository
 import com.stoganet.tv.data.home.HomeRepository
 import com.stoganet.tv.data.library.LibraryRepository
 import com.stoganet.tv.data.net.StoganetApi
@@ -24,4 +25,6 @@ class ServiceLocator(context: Context) {
     val homeRepository: HomeRepository by lazy { HomeRepository(stoganetApi) }
 
     val libraryRepository: LibraryRepository by lazy { LibraryRepository(stoganetApi) }
+
+    val detailRepository: DetailRepository by lazy { DetailRepository(stoganetApi) }
 }

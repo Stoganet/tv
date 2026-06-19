@@ -17,6 +17,7 @@ protobuf = "4.35.1"
 protobuf-plugin = "0.10.0"
 tink = "1.21.0"
 timber = "5.0.1"
+media3 = "1.10.1"
 turbine = "1.2.1"
 coroutines-test = "1.11.0"
 junit-jupiter = "6.1.0"
@@ -69,6 +70,9 @@ protobuf-javalite = { group = "com.google.protobuf", name = "protobuf-javalite",
 tink-android = { group = "com.google.crypto.tink", name = "tink-android", version.ref = "tink" }
 
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
+media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3" }
 
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines-test" }
