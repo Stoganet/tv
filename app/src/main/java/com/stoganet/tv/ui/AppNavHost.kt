@@ -98,7 +98,9 @@ fun AppNavHost() {
             DetailScreen(
                 state = state,
                 onIntent = vm::onIntent,
-                onNavigateToPlayer = { streamUrl -> navController.navigate(AppRoutes.player(id, streamUrl)) },
+                onNavigateToPlayer = { streamUrl, positionMs ->
+                    navController.navigate(AppRoutes.player(id, streamUrl, positionMs))
+                },
             )
         }
         composable(
@@ -110,11 +112,16 @@ fun AppNavHost() {
                     nullable = true
                     defaultValue = null
                 },
+                navArgument("positionMs") {
+                    type = NavType.LongType
+                    defaultValue = 0L
+                },
             ),
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id") ?: return@composable
             val streamUrl = backStackEntry.arguments?.getString("streamUrl")
-            val vm: PlayerViewModel = viewModel(factory = PlayerViewModel.factory(id, streamUrl))
+            val positionMs = backStackEntry.arguments?.getLong("positionMs") ?: 0L
+            val vm: PlayerViewModel = viewModel(factory = PlayerViewModel.factory(id, streamUrl, positionMs))
             val state by vm.state.collectAsStateWithLifecycle()
             PlayerScreen(
                 state = state,

@@ -61,7 +61,7 @@ class PlayerViewModelTest {
         genres = listOf("Action"),
         runtime = 136,
         cast = listOf(CastMember(name = "Keanu Reeves", role = "Actor")),
-        seasons = 0,
+        seasons = emptyList(),
         play = play,
     )
 

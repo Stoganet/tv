@@ -30,6 +30,7 @@ class PlayerViewModel(
     val player: ExoPlayer,
     private val mediaSession: MediaSession,
     private val streamUrl: String? = null,
+    private val positionMs: Long = 0L,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<PlayerUiState>(PlayerUiState.Loading)
@@ -48,6 +49,7 @@ class PlayerViewModel(
         val url = streamUrl
         if (url != null) {
             player.setMediaItem(MediaItem.fromUri(url))
+            if (positionMs > 0L) player.seekTo(positionMs)
             player.prepare()
             _state.update { PlayerUiState.Ready }
             return
@@ -76,28 +78,30 @@ class PlayerViewModel(
 
     companion object {
         @androidx.annotation.OptIn(UnstableApi::class)
-        fun factory(id: String, streamUrl: String? = null): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val app = this[APPLICATION_KEY] as StoganetApp
-                val tokenStore = app.services.tokenStore
-                val dataSourceFactory = DataSource.Factory {
-                    val token = runBlocking { tokenStore.accessToken() }.orEmpty()
-                    DefaultHttpDataSource.Factory()
-                        .setDefaultRequestProperties(mapOf("Authorization" to "Bearer $token"))
-                        .createDataSource()
+        fun factory(id: String, streamUrl: String? = null, positionMs: Long = 0L): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    val app = this[APPLICATION_KEY] as StoganetApp
+                    val tokenStore = app.services.tokenStore
+                    val dataSourceFactory = DataSource.Factory {
+                        val token = runBlocking { tokenStore.accessToken() }.orEmpty()
+                        DefaultHttpDataSource.Factory()
+                            .setDefaultRequestProperties(mapOf("Authorization" to "Bearer $token"))
+                            .createDataSource()
+                    }
+                    val player = ExoPlayer.Builder(app)
+                        .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory))
+                        .build()
+                    val mediaSession = MediaSession.Builder(app, player).build()
+                    PlayerViewModel(
+                        id = id,
+                        repository = app.services.detailRepository,
+                        player = player,
+                        mediaSession = mediaSession,
+                        streamUrl = streamUrl,
+                        positionMs = positionMs,
+                    )
                 }
-                val player = ExoPlayer.Builder(app)
-                    .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory))
-                    .build()
-                val mediaSession = MediaSession.Builder(app, player).build()
-                PlayerViewModel(
-                    id = id,
-                    repository = app.services.detailRepository,
-                    player = player,
-                    mediaSession = mediaSession,
-                    streamUrl = streamUrl,
-                )
             }
-        }
     }
 }

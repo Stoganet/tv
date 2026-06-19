@@ -11,6 +11,8 @@ complexity:
     allowedFunctionsPerClass: 25
     allowedFunctionsPerInterface: 25
     allowedFunctionsPerObject: 25
+    ignoreAnnotatedFunctions:
+      - 'Composable'
 
 style:
   MagicNumber:
@@ -24,6 +26,8 @@ style:
     ignoreEnums: true
     ignoreRanges: true
     ignoreAnnotation: true
+    ignoreAnnotated:
+      - 'Preview'
   MaxLineLength:
     maxLineLength: 120
   ReturnCount:
