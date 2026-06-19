@@ -170,6 +170,7 @@ class LibraryViewModelTest {
         vm.onIntent(LibraryIntent.LoadMore) // no-ops: isLoadingMore guard fires
 
         coVerify(exactly = 2) { repository.getLibrary(any(), any(), any()) } // init + first LoadMore only
+        deferred.cancel()
     }
 
     @Test
@@ -180,7 +181,7 @@ class LibraryViewModelTest {
 
         vm.onIntent(LibraryIntent.Retry) // no-ops: Loading guard fires
 
-        deferred.complete(Result.success(fakeResponse()))
+        deferred.cancel()
         coVerify(exactly = 1) { repository.getLibrary(any(), any(), any()) }
     }
 
