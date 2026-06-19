@@ -116,6 +116,17 @@ class DetailViewModelTest {
     }
 
     @Test
+    fun `isPlayable is false when state is not PLAYABLE even with play info`() = runTest {
+        val detail = fakeDetail().copy(state = MediaState.DOWNLOADING)
+        coEvery { repository.getDetail(any()) } returns Result.success(detail)
+        val vm = DetailViewModel(id = "id1", repository = repository)
+
+        val state = vm.state.value as DetailUiState.Content
+        assertFalse(state.isPlayable)
+        assertEquals("https://api.stoganet.com/stream/jf-uuid", state.streamUrl)
+    }
+
+    @Test
     fun `formatRuntime formats hours and minutes`() {
         assertEquals("2h 16m", DetailViewModel.formatRuntime(136))
     }

@@ -13,9 +13,10 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.test.core.app.ApplicationProvider
 import com.stoganet.tv.R
+import com.stoganet.tv.ui.AppRoutes
 import kotlinx.collections.immutable.persistentListOf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -174,5 +175,33 @@ class HomeScreenTest {
         waitForIdle()
 
         assertEquals("library/movies", navigatedRoute)
+    }
+
+    @Test
+    fun contentState_posterCard_tapFiresOnNavigateTo() = runComposeUiTest {
+        var navigatedRoute: String? = null
+        setContent {
+            HomeScreen(
+                state = HomeUiState.Content(
+                    sections = persistentListOf(
+                        HomeSectionUiState(
+                            id = "all_movies",
+                            titleRes = R.string.home_section_all_movies,
+                            items = persistentListOf(HomeItemUiState("item-1", "", "Movie One (2020)")),
+                            hasMore = false,
+                            seeMoreRoute = null,
+                        ),
+                    ),
+                ),
+                onIntent = {},
+                onNavigateTo = { route -> navigatedRoute = route },
+            )
+        }
+
+        onNodeWithContentDescription("Movie One (2020)").requestFocus()
+        onNodeWithContentDescription("Movie One (2020)").performKeyInput { pressKey(Key.Enter) }
+        waitForIdle()
+
+        assertEquals(AppRoutes.detail("item-1"), navigatedRoute)
     }
 }

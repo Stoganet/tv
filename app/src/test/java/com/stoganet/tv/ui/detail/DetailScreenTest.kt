@@ -13,11 +13,12 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.test.core.app.ApplicationProvider
 import com.stoganet.tv.R
 import com.stoganet.tv.api.model.MediaType
 import kotlinx.collections.immutable.persistentListOf
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -140,5 +141,40 @@ class DetailScreenTest {
         setContent { DetailScreen(state = fakeMovieContent(), onIntent = {}, onNavigateToPlayer = {}) }
 
         onNodeWithText("Keanu Reeves").assertIsDisplayed()
+    }
+
+    @Test
+    fun contentState_movie_notPlayable_showsNotAvailableButton() = runComposeUiTest {
+        setContent {
+            DetailScreen(
+                state = fakeMovieContent(isPlayable = false),
+                onIntent = {},
+                onNavigateToPlayer = {},
+            )
+        }
+
+        onNodeWithContentDescription(
+            str(R.string.detail_not_available_content_description, "The Matrix"),
+        ).assertIsDisplayed()
+    }
+
+    @Test
+    fun contentState_movie_playButton_passesStreamUrlToCallback() = runComposeUiTest {
+        var receivedUrl: String? = null
+        val expectedUrl = "https://api.stoganet.com/stream/abc"
+        setContent {
+            DetailScreen(
+                state = fakeMovieContent(isPlayable = true).copy(streamUrl = expectedUrl),
+                onIntent = {},
+                onNavigateToPlayer = { url -> receivedUrl = url },
+            )
+        }
+
+        val playDesc = str(R.string.detail_play_content_description, "The Matrix")
+        onNodeWithContentDescription(playDesc).requestFocus()
+        onNodeWithContentDescription(playDesc).performKeyInput { pressKey(Key.Enter) }
+        waitForIdle()
+
+        assertEquals(expectedUrl, receivedUrl)
     }
 }

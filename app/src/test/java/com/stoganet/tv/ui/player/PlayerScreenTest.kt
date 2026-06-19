@@ -1,17 +1,22 @@
 package com.stoganet.tv.ui.player
 
 import android.content.Context
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.requestFocus
+import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.test.core.app.ApplicationProvider
 import com.stoganet.tv.R
 import io.mockk.mockk
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -53,5 +58,21 @@ class PlayerScreenTest {
 
         val ctx = ApplicationProvider.getApplicationContext<Context>()
         onNodeWithText(ctx.getString(R.string.player_back_content_description)).assertIsDisplayed()
+    }
+
+    @Test
+    fun errorState_backButton_invokesCallback() = runComposeUiTest {
+        var backCalled = false
+        setContent {
+            PlayerScreen(state = PlayerUiState.Error, onBack = { backCalled = true }, player = mockPlayer)
+        }
+
+        val ctx = ApplicationProvider.getApplicationContext<Context>()
+        val backDesc = ctx.getString(R.string.player_back_content_description)
+        onNodeWithText(backDesc).requestFocus()
+        onNodeWithText(backDesc).performKeyInput { pressKey(Key.Enter) }
+        waitForIdle()
+
+        assertTrue(backCalled)
     }
 }
