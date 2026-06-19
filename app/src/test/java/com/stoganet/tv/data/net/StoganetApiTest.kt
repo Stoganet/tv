@@ -208,4 +208,26 @@ class StoganetApiTest {
 
         api.getLibrary(cursor = "tok-123", limit = 100)
     }
+
+    @Test
+    fun `getDetail returns LibraryDetail on 200`() = runTest {
+        val json = """{"id":"tmdb:movie:603","title":"The Matrix","year":1999,"type":"movie",""" +
+            """"poster":"","overview":"A hacker.","state":"playable","genres":[],"runtime":136,"cast":[],"seasons":0}"""
+        val engine = MockEngine { respond(json, HttpStatusCode.OK, jsonHeader) }
+        val api = buildApi(engine)
+
+        val result = api.getDetail("tmdb:movie:603")
+
+        assertEquals("tmdb:movie:603", result.id)
+        assertEquals("The Matrix", result.title)
+        assertEquals(1999, result.year)
+    }
+
+    @Test
+    fun `getDetail throws on non-success status`() = runTest {
+        val engine = MockEngine { respond("", HttpStatusCode.NotFound) }
+        val api = buildApi(engine)
+
+        assertThrows<IllegalStateException> { api.getDetail("tmdb:movie:603") }
+    }
 }

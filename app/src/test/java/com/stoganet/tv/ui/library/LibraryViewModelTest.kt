@@ -8,6 +8,7 @@ import com.stoganet.tv.data.library.LibraryRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -155,6 +156,33 @@ class LibraryViewModelTest {
 
         assertInstanceOf(LibraryUiState.Content::class.java, vm.state.value)
         coVerify { repository.getLibrary(MediaType.TV, null, any()) }
+    }
+
+    @Test
+    fun `LoadMore no-ops when already loading more`() = runTest {
+        val deferred = CompletableDeferred<Result<LibraryListResponse>>()
+        val page1 = fakeResponse(items = listOf(fakeItem("1")), nextCursor = "cursor1")
+        coEvery { repository.getLibrary(any(), null, any()) } returns Result.success(page1)
+        coEvery { repository.getLibrary(any(), "cursor1", any()) } coAnswers { deferred.await() }
+
+        val vm = LibraryViewModel(MediaType.MOVIE, repository)
+        vm.onIntent(LibraryIntent.LoadMore) // isLoadingMore = true, suspended
+        vm.onIntent(LibraryIntent.LoadMore) // no-ops: isLoadingMore guard fires
+
+        coVerify(exactly = 2) { repository.getLibrary(any(), any(), any()) } // init + first LoadMore only
+        deferred.cancel()
+    }
+
+    @Test
+    fun `Retry no-ops when already Loading`() = runTest {
+        val deferred = CompletableDeferred<Result<LibraryListResponse>>()
+        coEvery { repository.getLibrary(any(), any(), any()) } coAnswers { deferred.await() }
+        val vm = LibraryViewModel(MediaType.MOVIE, repository)
+
+        vm.onIntent(LibraryIntent.Retry) // no-ops: Loading guard fires
+
+        deferred.cancel()
+        coVerify(exactly = 1) { repository.getLibrary(any(), any(), any()) }
     }
 
     @Test

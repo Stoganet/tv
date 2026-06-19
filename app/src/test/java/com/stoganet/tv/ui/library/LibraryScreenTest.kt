@@ -13,10 +13,12 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.test.core.app.ApplicationProvider
 import com.stoganet.tv.R
+import com.stoganet.tv.ui.AppRoutes
 import kotlinx.collections.immutable.persistentListOf
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -115,5 +117,29 @@ class LibraryScreenTest {
         }
 
         onNodeWithText(str(R.string.library_load_more_error)).assertIsDisplayed()
+    }
+
+    @Test
+    fun contentState_posterCard_tapFiresOnNavigateTo() = runComposeUiTest {
+        var navigatedRoute: String? = null
+        setContent {
+            LibraryScreen(
+                state = LibraryUiState.Content(
+                    items = persistentListOf(
+                        LibraryItemUiState(id = "item-1", posterUrl = "", contentDescription = "Inception (2010)"),
+                    ),
+                    hasMore = false,
+                    isLoadingMore = false,
+                ),
+                onIntent = {},
+                onNavigateTo = { route -> navigatedRoute = route },
+            )
+        }
+
+        onNodeWithContentDescription("Inception (2010)").requestFocus()
+        onNodeWithContentDescription("Inception (2010)").performKeyInput { pressKey(Key.Enter) }
+        waitForIdle()
+
+        assertEquals(AppRoutes.detail("item-1"), navigatedRoute)
     }
 }

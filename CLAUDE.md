@@ -67,6 +67,11 @@ These cross-file constraints matter when editing — violating any is a 🔴 Imp
   `createDataSource()` on its loader thread).
 - **ViewModel factory `initializer {}` runs on the main thread** — no blocking
   I/O, no `runBlocking` over suspend functions there.
+- **`CompletableDeferred` in tests must be resolved before the test body ends.**
+  Call `.complete(value)` or `.cancel()` — never rely on dispatcher teardown to
+  implicitly clean up a suspended coroutine. If bridging a callback API in
+  production, prefer `suspendCancellableCoroutine` (handles cancellation
+  automatically) over `CompletableDeferred`.
 
 ## Common operations
 

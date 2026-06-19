@@ -20,6 +20,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -113,6 +114,17 @@ class DetailViewModelTest {
         val state = vm.state.value as DetailUiState.Content
         assertFalse(state.isPlayable)
         assertNull(state.streamUrl)
+    }
+
+    @Test
+    fun `isPlayable is false when state is not PLAYABLE even with play info`() = runTest {
+        val detail = fakeDetail().copy(state = MediaState.DOWNLOADING)
+        coEvery { repository.getDetail(any()) } returns Result.success(detail)
+        val vm = DetailViewModel(id = "id1", repository = repository)
+
+        val state = vm.state.value as DetailUiState.Content
+        assertFalse(state.isPlayable)
+        assertNotNull(state.streamUrl)
     }
 
     @Test
