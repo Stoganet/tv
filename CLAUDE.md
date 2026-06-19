@@ -42,6 +42,7 @@ These cross-file constraints matter when editing — violating any is a 🔴 Imp
 - **All token access goes through `TokenStore`** (Proto DataStore + Tink). No raw
   `SharedPreferences`, no direct file I/O, no globals.
 - **`UiState` is immutable** and updated only via `_state.update { it.copy(...) }`.
+- **Required parameters before optional ones** in data classes and functions.
 - **`UiState` data classes are annotated `@Immutable`** — tells the Compose compiler the type is
   stable, enables recomposition skipping.
 - **Collections inside `UiState` are `ImmutableList` / `ImmutableMap`** from
@@ -55,7 +56,7 @@ These cross-file constraints matter when editing — violating any is a 🔴 Imp
 - **All interactive TV elements have an explicit `contentDescription`** via
   `Modifier.semantics { contentDescription = "..." }`. On TV, TalkBack reads `contentDescription`
   from the focusable element — child `Text` implicit labels are unreliable on D-pad focus.
-- **Strings live in `res/values/strings.xml`.** No hardcoded user-visible English in Compose code.
+- **Strings live in `res/values/strings.xml`.** No hardcoded user-visible English in Compose code. Pure format patterns that contain no translatable words (e.g. `"${n}. $title"`, `"${h}h ${m}m"`) are exempt — the words come from the API or are universal punctuation.
 - **No telemetry / crash reporting / analytics.**
 - **CI actions are SHA-pinned**, never tag-pinned.
 - **Never call `runBlocking` on the main thread.** ViewModel factories

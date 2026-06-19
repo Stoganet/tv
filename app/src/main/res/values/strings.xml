@@ -44,4 +44,10 @@
         <item quantity="one">%d Season</item>
         <item quantity="other">%d Seasons</item>
     </plurals>
+    <string name="detail_resume_button">Resume</string>
+    <string name="detail_resume_content_description">Resume %1$s</string>
+    <string name="detail_season_chip_content_description">Season %1$d</string>
+    <string name="detail_episodes_label">Episodes</string>
+    <string name="detail_episode_content_description">Play episode %1$d: %2$s</string>
+    <string name="detail_episode_runtime">%1$d min</string>
 </resources>

@@ -1,5 +1,7 @@
 package com.stoganet.tv.data.net
 
+import com.stoganet.tv.api.model.Episode
+import com.stoganet.tv.api.model.EpisodeListResponse
 import com.stoganet.tv.api.model.HomeResponse
 import com.stoganet.tv.api.model.LibraryDetail
 import com.stoganet.tv.api.model.LibraryListResponse
@@ -86,5 +88,11 @@ class StoganetApi(private val client: HttpClient, private val baseUrl: String = 
         val response = client.get("${baseUrl}library/$id")
         check(response.status.isSuccess()) { "getDetail failed: ${response.status.value}" }
         return response.body()
+    }
+
+    suspend fun getEpisodes(id: String, seasonNumber: Int): List<Episode> {
+        val response = client.get("${baseUrl}library/$id/seasons/$seasonNumber/episodes")
+        check(response.status.isSuccess()) { "getEpisodes failed: ${response.status.value}" }
+        return response.body<EpisodeListResponse>().episodes
     }
 }

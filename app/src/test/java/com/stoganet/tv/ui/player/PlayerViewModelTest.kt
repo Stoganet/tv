@@ -61,7 +61,7 @@ class PlayerViewModelTest {
         genres = listOf("Action"),
         runtime = 136,
         cast = listOf(CastMember(name = "Keanu Reeves", role = "Actor")),
-        seasons = 0,
+        seasons = emptyList(),
         play = play,
     )
 
@@ -73,7 +73,7 @@ class PlayerViewModelTest {
         val vm = PlayerViewModel(id = "id1", repository = repository, player = player, mediaSession = mediaSession)
 
         assertTrue(vm.state.value is PlayerUiState.Ready)
-        verify { player.setMediaItem(any<MediaItem>()) }
+        verify { player.setMediaItem(any<MediaItem>(), any<Long>()) }
         verify { player.prepare() }
     }
 
@@ -104,7 +104,7 @@ class PlayerViewModelTest {
         )
 
         assertTrue(vm.state.value is PlayerUiState.Ready)
-        verify { player.setMediaItem(any<MediaItem>()) }
+        verify { player.setMediaItem(any<MediaItem>(), any<Long>()) }
         verify { player.prepare() }
         coVerify(exactly = 0) { repository.getDetail(any()) }
     }
